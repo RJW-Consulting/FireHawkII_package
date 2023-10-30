@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "type": "cortex-debug",
+            "cwd": "${workspaceFolder}",
+            "executable": "..//.build//FireHawk_II_devel.ino.elf",
+            "request": "launch",
+            "device": "ATSAMD21G18",
+            "servertype": "jlink",
+            "armToolchainPath": "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\10 2021.10\\bin\\"
+            
+        },
+     ]
+}

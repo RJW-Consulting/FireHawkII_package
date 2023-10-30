@@ -1,0 +1,9 @@
+8/3/2023
+Flow stability tests
+Will record 10 minutes at targeted flows, starting with pump off
+
+DAC settiings for flow delivery
+   2610 gives about 4000 SCCM
+   1715 gives about 107 SCCM
+   
+   

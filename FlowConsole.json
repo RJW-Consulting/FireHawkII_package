@@ -1,0 +1,56 @@
+{
+    "frameEnd": "",
+    "frameStart": "",
+    "groups": [
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Flow",
+                    "units": "SCCM",
+                    "value": "%4",
+                    "widget": "gauge"
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "current",
+                    "units": "mA",
+                    "value": "%3",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "DAC",
+                    "units": "",
+                    "value": "%2",
+                    "widget": ""
+                }
+            ],
+            "title": "FlowPlot",
+            "widget": "multiplot"
+        }
+    ],
+    "separator": "",
+    "title": "WatchFlow"
+}
