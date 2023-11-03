@@ -65,6 +65,16 @@ uint8_t Driver_selectorValves::getvalveState(int gang, int valve)
     return this->valveStates[gang][valve].state;
 }
 
+void Driver_selectorValves::openSet(int set)
+{
+    for (int gang = 0; gang < NUM_VALVE_GANGS; gang++)
+    {
+        closeGang(gang);
+        openValve(gang, set);
+    }
+    doUpdate = true;
+
+}
 
 void Driver_selectorValves::tick()
 {

@@ -14,6 +14,7 @@ class DataLogger
 {
     public:
         DataLogger();
+        void init();
         void setDateTime(DateTime *sysDateTime);
         void setCO2Driver(Driver_ppsystemsCO2 *sysCO2Driver);
         void setIntervalSecs(uint16_t intervalSecs);
@@ -30,6 +31,9 @@ class DataLogger
         Driver_ppsystemsCO2 *co2Driver;
 
         String buildLogString();
+        String getLogStringHeader();
+        String logicalString(bool val);
+
 };
 
 #endif

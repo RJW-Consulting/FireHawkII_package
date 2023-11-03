@@ -2,6 +2,7 @@
 #include <String.h>
 #include <WString.h>
 #include "Driver_ppsystemsCO2.h"
+#include "globals.h"
 
 Driver_ppsystemsCO2::Driver_ppsystemsCO2()
 {
@@ -55,6 +56,9 @@ void Driver_ppsystemsCO2::tick()
         }
       }
     }
+    readings.measurementTime = this->nowPtr;
+    readings.co2Conc = lastCO2Reading;
+    settings.co2State = state;
   }
 }
 
@@ -232,3 +236,23 @@ float Driver_ppsystemsCO2::getMeasurement(DateTime &measurementTime)
   return this->lastCO2Reading;
 }
 
+void Driver_ppsystemsCO2::setPump(bool state)
+{
+  if (state)
+  {
+    send("P1\n");
+  }
+  else
+  {
+    send("P0\n");
+  }
+  pumpRunning = state;
+  settings.co2PumpOn = state;
+
+}
+
+bool Driver_ppsystemsCO2::getPumpState()
+{
+  return pumpRunning;
+}
+  

@@ -14,6 +14,7 @@
 #include "Driver_ppsystemsCO2.h"
 #include "Driver_selectorValves.h"
 #include "DataLogger.h"
+#include "globals.h"
 
 
 RTC_PCF8523 rtc;
@@ -38,6 +39,10 @@ Adafruit_MCP4728 mcp;
 
 #define STEP_TEST 1
 
+struct Readings readings;
+struct Settings settings;
+
+
 //**************************************************************************
 // Can use these function for RTOS delays
 // Takes into account processor speed
@@ -58,13 +63,14 @@ void myDelayMsUntil(TickType_t *previousWakeTime, int ms)
   vTaskDelayUntil( previousWakeTime, (ms * 1000) / portTICK_PERIOD_US );  
 }
 
+
 // Global variables
 int flowAOPin = A0;                               
 DateTime now;
 uint32_t msClock = 0;
 Driver_ppsystemsCO2 co2;
 Driver_selectorValves selectorValves;
-//DataLogger dataLogger;
+DataLogger dataLogger;
 
 #define INTERVAL_MS_CLOCK 1
 #define INTERVAL_DRIVER_TICK 10
@@ -89,7 +95,7 @@ static void task_driver_tick(void *pvParameters)
     now = rtc.now();
     co2.tick();
     selectorValves.tick();
-    //dataLogger.tick();
+    dataLogger.tick();
     myDelayMs(INTERVAL_DRIVER_TICK);
   }
 }
@@ -242,10 +248,17 @@ void setup()
       delay(1);
   }
   Serial.println("USB Serial Initialized");
+  // Disable the radio so it does not hold onto the MISO pin
+  // and get in the way of the SD card
+  // (temporary measure until radio used)
+  pinMode(8,OUTPUT);
+  digitalWrite(8,HIGH);
+
+  dataLogger.init();
   initDrivers();
-  //dataLogger.setCO2Driver(&co2);
-  //dataLogger.setDateTime(&now);
-  //dataLogger.beginLogging();
+  dataLogger.setCO2Driver(&co2);
+  dataLogger.setDateTime(&now);
+  dataLogger.beginLogging();
 
   vSetErrorLed(ERROR_LED_PIN, ERROR_LED_LIGHTUP_STATE);
   vSetErrorSerial(&Serial);

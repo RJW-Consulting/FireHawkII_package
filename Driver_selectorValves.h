@@ -3,9 +3,7 @@
 
 #include "Arduino.h" 
 #include "PCA9685.h"
-
-#define NUM_VALVE_GANGS 3
-#define NUM_VALVES_PER_GANG 3
+#include "globals.h"
 
 //#define PCA9685_BASE_I2C_ADDR 0x40
 #define PCA9685_BASE_I2C_ADDR 0x40
@@ -22,6 +20,7 @@ class Driver_selectorValves
     void init();
     void setMSClock(uint32_t *msClockPtr);
     void openValve(int gang, int valve);
+    void openSet(int set);
     void closeGang(int gang);
     void setHitTime(uint32_t  msecs);
     void setHitPct(int pct);

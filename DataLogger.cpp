@@ -1,6 +1,11 @@
 #include "DataLogger.h"
+#include "globals.h"
 
 DataLogger::DataLogger()
+{
+}
+
+void DataLogger::init()
 {
     logFileName = "";
     if (!SD.begin(SD_CARD_CS)) 
@@ -37,9 +42,9 @@ bool DataLogger::beginLogging()
     bool retVal = false;
 
     sprintf(buffer, "d%02d%02d%02d",
-     systemTime->year() % 100,
-     systemTime->month(),
-     systemTime->day());
+        systemTime->year() % 100,
+        systemTime->month(),
+        systemTime->day());
 
     logFileName = "d";
     logFileName += buffer;
@@ -65,6 +70,7 @@ bool DataLogger::stopLogging()
         currentFile.close();
         //currentFile = NULL;
     }
+    logFileName = "";
     return true;
 }
 
@@ -77,33 +83,100 @@ void DataLogger::tick()
         if (currentFile)
         {
             currentFile.write(logLine.c_str());
+            currentFile.flush();
             lastLogTime = *systemTime;
         }
     } 
 }
 
+String DataLogger::getLogStringHeader()
+{
+    String header;
+    
+    header = "";
+    header += "date_time,";
+    header += "sample_channel,";
+    header += "sample_pump,";
+    header += "co2_pump,";
+    header += "flow_sorbent,";
+    header += "flow_aerosol,";
+    header += "flow_carbon,";
+    header += "co2_status,";
+    header += "co2_ppm,";
+    header += "total_co2_sorbent,";
+    header += "total_co2_aerosol,";
+    header += "total_co2_carbon,";
+    header += "co_mv,";
+    header += "co_ppm,";
+    header += "air_t,";
+    header += "air_p,";
+    header += "air_rh,";
+    header += "case_t,";
+    header += "battery_v";
+    return header;
+}
+
+String DataLogger::logicalString(bool val)
+{
+    String line;
+    if (val)
+        line = "1";
+    else
+        line = "0";
+    return line;
+}
 
 String DataLogger::buildLogString()
 {
-    char buffer[32];
-    String line;
-
-    line += systemTime->timestamp();
-    line += ",";
-    line += (co2Driver->getState() + ",");
-    if (co2Driver->getState() == 'M')
+    String line = "";
+    String co2Reading;
+    if (settings.co2State == 'M')
     {
-        DateTime mTime;
-        float measurement = co2Driver->getMeasurement(mTime);
-        sprintf(buffer, "%5.1f", measurement);
-        line += buffer;
-        line += ",";
+        co2Reading = String(readings.coConc,2);
     }
     else
     {
-        line += "***,";
+        co2Reading += "***";
     }
-    line += "\n";
+ 
+    line = readings.measurementTime.timestamp();
+    line += ",";
+    line += String(readings.sampleSet);
+    line += ",";
+    line += logicalString(settings.samplePumpOn);
+    line += ",";
+    line += logicalString(settings.co2PumpOn);
+    line += ",";
+    line += String(readings.flowSorbent);
+    line += ",";
+    line += String(readings.flowAerosol);
+    line += ",";
+    line += String(readings.flowCarbon);
+    line += ",";
+    line += settings.co2State;
+    line += ",";
+    line += co2Reading;
+    line += ",";
+    line += String(readings.co2MassSorbant,2);
+    line += ",";
+    line += String(readings.co2MassAerosol,2);
+    line += ",";
+    line += String(readings.co2MassCarbon,2);
+    line += ",";
+    line += String(readings.coMv);
+    line += ",";
+    line += String(readings.coConc,2);
+    line += ",";
+    line += String(readings.airTemp,1);
+    line += ",";
+    line += String(readings.pressure,1);
+    line += ",";
+    line += String(readings.rh,1);
+    line += ",";
+    line += String(readings.caseTemp,1);
+    line += ",";
+    line += String(readings.batteryV,2);
+    line += '\n';
 
     return line;
 }
