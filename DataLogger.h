@@ -33,6 +33,7 @@ class DataLogger
         String buildLogString();
         String getLogStringHeader();
         String logicalString(bool val);
+        void fillDataPacket(struct DataPacket *packet);
 
 };
 

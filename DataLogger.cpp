@@ -181,4 +181,31 @@ String DataLogger::buildLogString()
     return line;
 }
 
+void DataLogger::fillDataPacket(struct DataPacket *packet)
+{
+    strcpy(packet->dateTime,"YYYYMMDDhhmmss");
+    readings.measurementTime.toString(packet->dateTime);
+    packet->sampleChannel = readings.sampleSet;
+    packet->samplePump = settings.samplePumpOn;
+    packet->co2Pump = settings.co2PumpOn;
+    packet->flowSorbant = readings.flowSorbent;
+    packet->flowAerosol = readings.flowAerosol;
+    packet->flowCarbon = readings.flowCarbon;
+    packet->co2Status = settings.co2State;
+    packet->co2PPM = readings.co2Conc;
+    packet->co2MassSorbant = readings.co2MassSorbant;
+    packet->co2MassAerosol = readings.co2MassAerosol;
+    packet->co2MassCarbon = readings.co2MassCarbon;
+    packet->coMv = readings.coMv;
+    packet->coConc = readings.coConc;
+    packet->pressure = readings.pressure;
+    packet->rh = readings.rh;
+    packet->airTemp = readings.airTemp;
+    packet->caseTemp = readings.caseTemp;
+    packet->batteryV = readings.batteryV;
+}
+
+
+
+
 

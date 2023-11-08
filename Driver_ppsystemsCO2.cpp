@@ -56,7 +56,7 @@ void Driver_ppsystemsCO2::tick()
         }
       }
     }
-    readings.measurementTime = this->nowPtr;
+    readings.measurementTime = *(this->nowPtr);
     readings.co2Conc = lastCO2Reading;
     settings.co2State = state;
   }

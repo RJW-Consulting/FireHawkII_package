@@ -20,6 +20,8 @@ class Driver_ppsystemsCO2
     void send(String message);
     uint16_t receive(String &message);
     bool receiveAvailable();
+    void setPump(bool state);
+    bool getPumpState();
   
   private:
     DateTime *nowPtr;
@@ -30,6 +32,7 @@ class Driver_ppsystemsCO2
     float lastIRGATemperature;
     int zeroCount;
     int zeroFinalCount;
+    bool pumpRunning;
     uint8_t measInterval;
     String inText;
     String co2message;

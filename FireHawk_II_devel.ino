@@ -1,3 +1,6 @@
+
+
+
 #include "FreeRTOS_SAMD21.h"
 
 #include <Adafruit_MCP4728.h>
@@ -7,12 +10,18 @@
   test of Parker 
   
 */
+#define PICO_NO_HARDWARE 1
 
 #include <Wire.h>
+#include <arduino.h>
 #include <Adafruit_INA219.h>
+#include <Adafruit_NeoPixel.h>
+#include <rp2040_pio.h>
 #include "RTClib.h"
 #include "Driver_ppsystemsCO2.h"
 #include "Driver_selectorValves.h"
+#include "Driver_StatusLED.h"
+#include "control.h"
 #include "DataLogger.h"
 #include "globals.h"
 
@@ -36,11 +45,10 @@ Adafruit_MCP4728 mcp;
 #define RELAY_ON_PIN 5
 #define RELAY_OFF_PIN 6
 #define VALVE_CONTROL_PIN 10 
+#define STATUS_LED_PIN 11
 
 #define STEP_TEST 1
 
-struct Readings readings;
-struct Settings settings;
 
 
 //**************************************************************************
@@ -70,7 +78,11 @@ DateTime now;
 uint32_t msClock = 0;
 Driver_ppsystemsCO2 co2;
 Driver_selectorValves selectorValves;
+Driver_StatusLED led;
 DataLogger dataLogger;
+
+struct Readings readings;
+struct Settings settings;
 
 #define INTERVAL_MS_CLOCK 1
 #define INTERVAL_DRIVER_TICK 10
@@ -97,6 +109,7 @@ static void task_driver_tick(void *pvParameters)
     selectorValves.tick();
     dataLogger.tick();
     myDelayMs(INTERVAL_DRIVER_TICK);
+    led.tick();
   }
 }
 
@@ -214,6 +227,21 @@ static void task_test_drivers(void *pvParameters)
         selectorValves.closeGang(0);
       valveCount = 0;
     }
+    switch (co2.getState())
+    {
+      case CO2_STATE_MEASURING:
+        led.setStatus(CONTROL_STATE_SAMPLE_0);
+        break;
+      case CO2_STATE_WARMUP:
+        led.setStatus(CONTROL_STATE_WAIT_TRIGGER);
+        break;
+      case CO2_STATE_ZERO:
+        led.setStatus(CONTROL_STATE_SAMPLE_CO2_ZERO);
+        break;
+      case CO2_STATE_UNKNOWN:
+        led.setStatus(CONTROL_STATE_SENDING_LOG);
+        break;
+    }
     myDelayMs(INTERVAL_DRIVER_TEST);
   }
 }
@@ -221,11 +249,16 @@ static void task_test_drivers(void *pvParameters)
 
 
 //**************************************************************************
-// global variables
+// RTOS global variables
 //**************************************************************************
 TaskHandle_t handle_clock_task;
 TaskHandle_t handle_driver_tick_task;
 TaskHandle_t handle_test_task;
+
+QueueHandle_t handle_command_queue;
+QueueHandle_t handle_command_response_queue;
+QueueHandle_t handle_data_queue;
+
 
 void initDrivers()
 {
@@ -233,7 +266,8 @@ void initDrivers()
   now = rtc.now();
   co2.open(19200, &now, 1);
   selectorValves.init();
-  selectorValves.setMSClock(&msClock);  
+  selectorValves.setMSClock(&msClock);
+  led.init(STATUS_LED_PIN);  
 }
 
 // the setup routine runs once when you press reset:

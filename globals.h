@@ -2,6 +2,7 @@
 #define globals_h
 
 #include "RTClib.h"
+#include "FreeRTOS_SAMD21.h"
 
 #define NUM_VALVE_GANGS 3
 #define NUM_VALVES_PER_GANG 3
@@ -28,7 +29,7 @@ struct Readings {
 struct Settings {
     bool valveOpen[NUM_VALVE_GANGS][NUM_VALVES_PER_GANG];
     bool autoSample;
-    bool autoSampleWaiting
+    bool autoSampleWaiting;
     bool autoSampleCollecting;
     bool samplePumpOn;
     bool co2PumpOn;
@@ -66,5 +67,8 @@ struct DataPacket{
 
 extern struct Readings readings;
 extern struct Settings settings;
+
+extern QueueHandle_t handle_command_queue;
+extern QueueHandle_t handle_data_queue;
 
 #endif
