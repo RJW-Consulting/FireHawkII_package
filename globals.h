@@ -21,9 +21,11 @@ struct Readings {
     float caseTemp;
     float batteryV;
     uint sampleSet;
-    uint flowSorbent; 
-    uint flowAerosol; 
-    uint flowCarbon; 
+    double flowSorbent; 
+    double flowAerosol; 
+    double flowCarbon; 
+    float pressure1;
+    float pressure2;
 };
 
 struct Settings {
@@ -34,9 +36,9 @@ struct Settings {
     bool samplePumpOn;
     bool co2PumpOn;
     char co2State;
-    uint flowSorbentSetPoint; 
-    uint flowAerosolSetPoint; 
-    uint flowCarbonSetPoint;
+    double flowSorbentSetPoint; 
+    double flowAerosolSetPoint; 
+    double flowCarbonSetPoint;
     float coCalLowConc;
     float coCalLowMV;
     float coCalHighConc;
@@ -44,7 +46,7 @@ struct Settings {
 };
 
 struct DataPacket{
-    char dateTime[14];
+    char dateTime[16];
     uint_fast8_t sampleChannel;
     uint_fast8_t samplePump;
     uint_fast8_t co2Pump;
@@ -63,6 +65,8 @@ struct DataPacket{
     float airTemp;
     float caseTemp;
     float batteryV;
+    float pressure1;
+    float pressure2;
 };
 
 extern struct Readings readings;

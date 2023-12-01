@@ -55,6 +55,11 @@ void Driver_ppsystemsCO2::tick()
           }
         }
       }
+      else
+      {
+        // Measurement received, plug into global
+        readings.co2Conc = lastCO2Reading;
+      }
     }
     readings.measurementTime = *(this->nowPtr);
     readings.co2Conc = lastCO2Reading;
@@ -93,6 +98,7 @@ bool Driver_ppsystemsCO2::receivedMeasurement()
       this->lastMessageTime = *(this->nowPtr);
       this->lastReadingTime = *(this->nowPtr);
       this->co2message = "";
+      readings.coConc = lastCO2Reading;
       ret = true;
     }
   }

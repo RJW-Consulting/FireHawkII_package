@@ -80,6 +80,8 @@ void DataLogger::tick()
     if ((systemTime->unixtime() - lastLogTime.unixtime()) >= logInterval)
     {
         String logLine = buildLogString();
+        if (Serial.availableForWrite())
+            Serial.println(logLine);
         if (currentFile)
         {
             currentFile.write(logLine.c_str());
@@ -98,8 +100,11 @@ String DataLogger::getLogStringHeader()
     header += "sample_channel,";
     header += "sample_pump,";
     header += "co2_pump,";
+    header += "flow_setpoint_sorbent,";
     header += "flow_sorbent,";
+    header += "flow_setpoint_aerosol,";
     header += "flow_aerosol,";
+    header += "flow_setpoint_carbon,";
     header += "flow_carbon,";
     header += "co2_status,";
     header += "co2_ppm,";
@@ -112,7 +117,9 @@ String DataLogger::getLogStringHeader()
     header += "air_p,";
     header += "air_rh,";
     header += "case_t,";
-    header += "battery_v";
+    header += "battery_v,";
+    header += "pressure1,";
+    header += "pressure2,";
     return header;
 }
 
@@ -138,8 +145,8 @@ String DataLogger::buildLogString()
     {
         co2Reading += "***";
     }
- 
-    line = readings.measurementTime.timestamp();
+    line = "/*"; 
+    line += readings.measurementTime.timestamp();
     line += ",";
     line += String(readings.sampleSet);
     line += ",";
@@ -147,9 +154,15 @@ String DataLogger::buildLogString()
     line += ",";
     line += logicalString(settings.co2PumpOn);
     line += ",";
+    line += String(settings.flowSorbentSetPoint);
+    line += ",";
     line += String(readings.flowSorbent);
     line += ",";
+    line += String(settings.flowAerosolSetPoint);
+    line += ",";
     line += String(readings.flowAerosol);
+    line += ",";
+    line += String(settings.flowCarbonSetPoint);
     line += ",";
     line += String(readings.flowCarbon);
     line += ",";
@@ -176,7 +189,11 @@ String DataLogger::buildLogString()
     line += String(readings.caseTemp,1);
     line += ",";
     line += String(readings.batteryV,2);
-    line += '\n';
+    line += ",";
+    line += String(readings.pressure1,2);
+    line += ",";
+    line += String(readings.pressure2,2);
+    line += "*/\n";
 
     return line;
 }
@@ -203,6 +220,8 @@ void DataLogger::fillDataPacket(struct DataPacket *packet)
     packet->airTemp = readings.airTemp;
     packet->caseTemp = readings.caseTemp;
     packet->batteryV = readings.batteryV;
+    packet->pressure1 = readings.pressure1;
+    packet->pressure2 = readings.pressure2;
 }
 
 
