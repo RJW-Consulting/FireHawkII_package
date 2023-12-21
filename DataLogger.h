@@ -2,8 +2,10 @@
 #define DataLogger_h
 
 #include "Arduino.h" 
+#include "string.h" 
 #include <SPI.h>
 #include <SD.h>
+#include "minIni.h"
 #include "RTClib.h"
 #include "Driver_ppsystemsCO2.h"
 
@@ -15,6 +17,7 @@ class DataLogger
     public:
         DataLogger();
         void init();
+        void loadSettings();
         void setDateTime(DateTime *sysDateTime);
         void setCO2Driver(Driver_ppsystemsCO2 *sysCO2Driver);
         void setIntervalSecs(uint16_t intervalSecs);
@@ -24,6 +27,7 @@ class DataLogger
 
     private:
         String logFileName;
+        minIni *ini;
         File currentFile;
         DateTime *systemTime;
         DateTime lastLogTime;
@@ -34,7 +38,7 @@ class DataLogger
         String getLogStringHeader();
         String logicalString(bool val);
         void fillDataPacket(struct DataPacket *packet);
-
+        bool initSDCard();
 };
 
 #endif

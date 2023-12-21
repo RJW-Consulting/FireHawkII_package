@@ -3,8 +3,9 @@
 
 #include <arduino.h>
 #include "FreeRTOS_SAMD21.h"
-#include "CommandParser.h"
 #include "globals.h"
+#include "CommandParser.h"
+#include "DataLogger.h"
 #include "Driver_selectorValves.h"
 
 
@@ -19,6 +20,8 @@ typedef CommandParser<> FH_CommandParser;
 
 extern Driver_selectorValves selectorValves;
 
+extern DataLogger dataLogger;
+
 class Command
 {
     public:
@@ -32,7 +35,7 @@ class Command
         // command handlers
         static void setFlow(FH_CommandParser::Argument *args, char *response);
         static void setSampleSet(FH_CommandParser::Argument *args, char *response);
-
+        static void enableLogFile(FH_CommandParser::Argument *args, char *response);
 };
 
 #endif

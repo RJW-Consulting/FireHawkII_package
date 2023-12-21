@@ -82,7 +82,7 @@ void Driver_ProportionalValve::tick()
        setValvePower(manualValveSetting);      
     else
     {
-      if (!enabled || (*setpoint == 0))
+      if (!enabled || (*setpoint == 0) || readings.sampleSet == 0)
       {
           setValvePower(MIN_DAC);
       }

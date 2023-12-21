@@ -7,6 +7,7 @@
 #include <Adafruit_MCP4728.h>
 #include <TCA9548A-SOLDERED.h>
 #include <PID_v1.h>
+#include "globals.h"
 
 class Driver_ProportionalValve
 {
@@ -21,9 +22,9 @@ class Driver_ProportionalValve
         void tick();
         void enablePID(bool doEnable){ enabled = doEnable;};
         void setManual(int manValveSetting){manualValveSetting = manValveSetting;};
-        void setKp(double ikp){kp = ikp;}; 
-        void setKi(double iki){ki = iki;}; 
-        void setKd(double ikd){kd = ikd;}; 
+        void setKp(double ikp){kp = ikp; pid->SetTunings(kp,ki,kd);}; 
+        void setKi(double iki){ki = iki; pid->SetTunings(kp,ki,kd);}; 
+        void setKd(double ikd){kd = ikd; pid->SetTunings(kp,ki,kd);}; 
         void setPWMpin(int pin){pwmPin = pin;};
 
     private:

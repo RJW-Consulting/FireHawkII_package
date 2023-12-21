@@ -92,7 +92,7 @@
                     "alarm": 0,
                     "fft": false,
                     "fftSamples": 1024,
-                    "graph": false,
+                    "graph": true,
                     "led": false,
                     "log": false,
                     "max": 0,
@@ -120,6 +120,20 @@
                     "title": "CO2",
                     "units": "",
                     "value": "%12",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": false,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "SampleSet",
+                    "units": "",
+                    "value": "%2",
                     "widget": ""
                 }
             ],

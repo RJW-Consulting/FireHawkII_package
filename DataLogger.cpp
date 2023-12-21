@@ -7,20 +7,61 @@ DataLogger::DataLogger()
 
 void DataLogger::init()
 {
+    initSDCard();
+    ini = new minIni("settings.ini");
+    loadSettings();
+}
+
+bool DataLogger::initSDCard()
+{
+    bool ret = false;
     logFileName = "";
     if (!SD.begin(SD_CARD_CS)) 
         Serial.println("Card failed, or not present");
     else
+    {
         Serial.println("card initialized.");
+        ret = true;
+    }
     logInterval = 1;
-    //currentFile = (SDLib::File) NULL;
+    return ret;
+}
+
+char section[] = "settings";
+
+void DataLogger::loadSettings()
+{
+    bool wasLogging = false;
+    if (logFileName != "")
+    {
+        stopLogging();
+        wasLogging = true;
+    }
+    settings.droneRadioAddress = ini->getl(section, "droneRadioAddress", 1);
+    settings.stationRadioAddress = ini->getl(section, "stationRadioAddress", 1);
+    settings.flowGasSetPoint = ini->getl(section, "flowGasSetPoint", 1); 
+    settings.flowOaSetPoint = ini->getl(section, "flowOaSetPoint", 1); 
+    settings.flowAmSetPoint = ini->getl(section, "flowAmSetPoint", 1);
+    settings.gasPIDKp = ini->getf(section, "gasPIDKp", 0.01);    
+    settings.gasPIDKi = ini->getf(section, "gasPIDKi", 0.5);
+    settings.gasPIDKd = ini->getf(section, "gasPIDKd", 0.01);
+    settings.oaPIDKp = ini->getf(section, "oaPIDKp", 0.01);    
+    settings.oaPIDKi = ini->getf(section, "oaPIDKi", 0.5);
+    settings.oaPIDKd = ini->getf(section, "oaPIDKd", 0.01);
+    settings.amPIDKp = ini->getf(section, "amPIDKp", 0.01);    
+    settings.amPIDKi = ini->getf(section, "amPIDKi", 0.5);
+    settings.amPIDKd = ini->getf(section, "amPIDKd", 0.01);
+
+    if (wasLogging)
+    {
+        beginLogging();
+    }
 }
 
 void DataLogger::setDateTime(DateTime *sysDateTime)
 {
     systemTime = sysDateTime;
     lastLogTime = *systemTime;
-
 }
 
 
@@ -46,18 +87,20 @@ bool DataLogger::beginLogging()
         systemTime->month(),
         systemTime->day());
 
-    logFileName = "d";
-    logFileName += buffer;
-    logFileName += ".dat";
-
-    currentFile = SD.open(logFileName, FILE_WRITE);
-    if (!currentFile)
+    if (initSDCard())
     {
-        Serial.printf("Cannot open file %s", logFileName);
-    }
-    else 
-    {
-        retVal = true;
+        logFileName = "d";
+        logFileName += buffer;
+        logFileName += ".dat";
+        currentFile = SD.open(logFileName, FILE_WRITE);
+        if (!currentFile)
+        {
+            Serial.printf("Cannot open file %s", logFileName);
+        }
+        else 
+        {
+            retVal = true;
+        }
     }
     return retVal;
 }
@@ -82,12 +125,12 @@ void DataLogger::tick()
         String logLine = buildLogString();
         if (Serial.availableForWrite())
             Serial.println(logLine);
-        if (currentFile)
+        if (logFileName != "")
         {
             currentFile.write(logLine.c_str());
             currentFile.flush();
-            lastLogTime = *systemTime;
         }
+        lastLogTime = *systemTime;
     } 
 }
 
@@ -100,17 +143,17 @@ String DataLogger::getLogStringHeader()
     header += "sample_channel,";
     header += "sample_pump,";
     header += "co2_pump,";
-    header += "flow_setpoint_sorbent,";
-    header += "flow_sorbent,";
-    header += "flow_setpoint_aerosol,";
-    header += "flow_aerosol,";
-    header += "flow_setpoint_carbon,";
-    header += "flow_carbon,";
+    header += "flow_setpoint_gas,";
+    header += "flow_gas,";
+    header += "flow_setpoint_oa,";
+    header += "flow_oa,";
+    header += "flow_setpoint_am,";
+    header += "flow_am,";
     header += "co2_status,";
     header += "co2_ppm,";
-    header += "total_co2_sorbent,";
-    header += "total_co2_aerosol,";
-    header += "total_co2_carbon,";
+    header += "total_co2_gas,";
+    header += "total_co2_oa,";
+    header += "total_co2_am,";
     header += "co_mv,";
     header += "co_ppm,";
     header += "air_t,";
@@ -154,27 +197,27 @@ String DataLogger::buildLogString()
     line += ",";
     line += logicalString(settings.co2PumpOn);
     line += ",";
-    line += String(settings.flowSorbentSetPoint);
+    line += String(settings.flowGasSetPoint);
     line += ",";
-    line += String(readings.flowSorbent);
+    line += String(readings.flowGas);
     line += ",";
-    line += String(settings.flowAerosolSetPoint);
+    line += String(settings.flowOaSetPoint);
     line += ",";
-    line += String(readings.flowAerosol);
+    line += String(readings.flowOa);
     line += ",";
-    line += String(settings.flowCarbonSetPoint);
+    line += String(settings.flowAmSetPoint);
     line += ",";
-    line += String(readings.flowCarbon);
+    line += String(readings.flowAm);
     line += ",";
     line += settings.co2State;
     line += ",";
     line += co2Reading;
     line += ",";
-    line += String(readings.co2MassSorbant,2);
+    line += String(readings.co2MassGas,2);
     line += ",";
-    line += String(readings.co2MassAerosol,2);
+    line += String(readings.co2MassOa,2);
     line += ",";
-    line += String(readings.co2MassCarbon,2);
+    line += String(readings.co2MassAm,2);
     line += ",";
     line += String(readings.coMv);
     line += ",";
@@ -205,14 +248,14 @@ void DataLogger::fillDataPacket(struct DataPacket *packet)
     packet->sampleChannel = readings.sampleSet;
     packet->samplePump = settings.samplePumpOn;
     packet->co2Pump = settings.co2PumpOn;
-    packet->flowSorbant = readings.flowSorbent;
-    packet->flowAerosol = readings.flowAerosol;
-    packet->flowCarbon = readings.flowCarbon;
+    packet->flowSorbant = readings.flowGas;
+    packet->flowOa = readings.flowOa;
+    packet->flowAm = readings.flowAm;
     packet->co2Status = settings.co2State;
     packet->co2PPM = readings.co2Conc;
-    packet->co2MassSorbant = readings.co2MassSorbant;
-    packet->co2MassAerosol = readings.co2MassAerosol;
-    packet->co2MassCarbon = readings.co2MassCarbon;
+    packet->co2MassGas = readings.co2MassGas;
+    packet->co2MassOa = readings.co2MassOa;
+    packet->co2MassAm = readings.co2MassAm;
     packet->coMv = readings.coMv;
     packet->coConc = readings.coConc;
     packet->pressure = readings.pressure;

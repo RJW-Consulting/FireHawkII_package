@@ -2,7 +2,7 @@
 
 
 #include "FreeRTOS_SAMD21.h"
-
+#include "semphr.h"
 #include <Adafruit_MCP4728.h>
 /*
 LoadFile ../.build/FireHawk_II_devel.ino.elf
@@ -75,12 +75,12 @@ void myDelayMsUntil(TickType_t *previousWakeTime, int ms)
   vTaskDelayUntil( previousWakeTime, (ms * 1000) / portTICK_PERIOD_US );  
 }
 
-#define SORBENT_VALVE_CHANNEL MCP4728_CHANNEL_A
-#define AEROSOL_VALVE_CHANNEL MCP4728_CHANNEL_B
-#define CARBON_VALVE_CHANNEL MCP4728_CHANNEL_C
-#define SORBENT_FLOW_MUX_CHANNEL 0
-#define AEROSOL_FLOW_MUX_CHANNEL 1
-#define CARBON_FLOW_MUX_CHANNEL 2
+#define gas_VALVE_CHANNEL MCP4728_CHANNEL_A
+#define oa_VALVE_CHANNEL MCP4728_CHANNEL_B
+#define am_VALVE_CHANNEL MCP4728_CHANNEL_C
+#define gas_FLOW_MUX_CHANNEL 0
+#define oa_FLOW_MUX_CHANNEL 1
+#define am_FLOW_MUX_CHANNEL 2
 #define FLOW_SENSOR_I2C 0x07
 #define PSENSOR1_MUX_CHANNEL 0x04
 #define PSENSOR2_MUX_CHANNEL 0x05
@@ -88,47 +88,50 @@ void myDelayMsUntil(TickType_t *previousWakeTime, int ms)
 // Global variables
 struct Readings readings;
 struct Settings settings;
+DateTime now;
+uint32_t msClock = 0;
 
+// Devices available globally
 RTC_PCF8523 rtc;
 Adafruit_INA219 ina219;
 Adafruit_MCP4728 mcp;
 int flowAOPin = A0;                               
-DateTime now;
-uint32_t msClock = 0;
+
 Driver_ppsystemsCO2 co2;
 Driver_selectorValves selectorValves;
 Driver_StatusLED led;
-DataLogger dataLogger;
-Command command;
 TCA9548A i2cMux;
 PressureSensor p1(&i2cMux, PSENSOR1_MUX_CHANNEL, &readings.pressure1);
 PressureSensor p2(&i2cMux, PSENSOR2_MUX_CHANNEL, &readings.pressure2);
 
-Driver_ProportionalValve sorbentValve(
+Driver_ProportionalValve gasValve(
                   &mcp, 
                   &i2cMux, 
-                  SORBENT_FLOW_MUX_CHANNEL,
+                  gas_FLOW_MUX_CHANNEL,
                   FLOW_SENSOR_I2C,
-                  SORBENT_VALVE_CHANNEL,
-                  &settings.flowSorbentSetPoint,
-                  &readings.flowSorbent);
-Driver_ProportionalValve aerosolValve(
+                  gas_VALVE_CHANNEL,
+                  &settings.flowGasSetPoint,
+                  &readings.flowGas);
+Driver_ProportionalValve oaValve(
                   &mcp, 
                   &i2cMux, 
-                  AEROSOL_FLOW_MUX_CHANNEL,
+                  oa_FLOW_MUX_CHANNEL,
                   FLOW_SENSOR_I2C,
-                  AEROSOL_VALVE_CHANNEL,
-                  &settings.flowAerosolSetPoint,
-                  &readings.flowAerosol);
-Driver_ProportionalValve carbonValve(
+                  oa_VALVE_CHANNEL,
+                  &settings.flowOaSetPoint,
+                  &readings.flowOa);
+Driver_ProportionalValve amValve(
                   &mcp, 
                   &i2cMux, 
-                  CARBON_FLOW_MUX_CHANNEL,
+                  am_FLOW_MUX_CHANNEL,
                   FLOW_SENSOR_I2C,
-                  CARBON_VALVE_CHANNEL,
-                  &settings.flowCarbonSetPoint,
-                  &readings.flowCarbon);
+                  am_VALVE_CHANNEL,
+                  &settings.flowAmSetPoint,
+                  &readings.flowAm);
 
+// Major system components available globally
+DataLogger dataLogger;
+Command command;
 
 #define INTERVAL_MS_CLOCK 1
 #define INTERVAL_DRIVER_TICK 10
@@ -158,9 +161,9 @@ static void task_driver_tick(void *pvParameters)
       co2.tick();
       selectorValves.tick();
       dataLogger.tick();
-      sorbentValve.tick();
-      aerosolValve.tick();    
-      carbonValve.tick();
+      gasValve.tick();
+      oaValve.tick();    
+      amValve.tick();
       led.tick();
       p1.tick();
       p2.tick();
@@ -199,16 +202,16 @@ bool enablePID = true;
 static void task_test_drivers(void *pvParameters)
 {
   char inchar;
-  settings.flowSorbentSetPoint = 200;
-  settings.flowAerosolSetPoint = 0;
-  settings.flowCarbonSetPoint = 0;
-  //sorbentValve.setManual(2000);
-  sorbentValve.enablePID(enablePID);
-  aerosolValve.enablePID(enablePID);
-  carbonValve.enablePID(enablePID);
-  //sorbentValve.setPWMpin(5);
-  //aerosolValve.setPWMpin(6);
-  //carbonValve.setPWMpin(9);
+  settings.flowGasSetPoint = 200;
+  settings.flowOaSetPoint = 0;
+  settings.flowAmSetPoint = 0;
+  //gasValve.setManual(2000);
+  gasValve.enablePID(enablePID);
+  oaValve.enablePID(enablePID);
+  amValve.enablePID(enablePID);
+  //gasValve.setPWMpin(5);
+  //oaValve.setPWMpin(6);
+  //amValve.setPWMpin(9);
   initialized = true;
   selectorValves.openSet(0);
 
@@ -294,16 +297,16 @@ static void task_test_drivers(void *pvParameters)
           switch (flowToSet)
           {
             case 's':
-              settings.flowSorbentSetPoint = flow;
-              //sorbentValve.setManual(flow);
+              settings.flowGasSetPoint = flow;
+              //gasValve.setManual(flow);
               break;
             case 'a':
-              settings.flowAerosolSetPoint = flow;
-              //aerosolValve.setManual(flow);
+              settings.flowOaSetPoint = flow;
+              //oaValve.setManual(flow);
               break;
             case 'c':
-              settings.flowCarbonSetPoint = flow;
-              //carbonValve.setManual(flow);
+              settings.flowAmSetPoint = flow;
+              //amValve.setManual(flow);
               break;
           }
           Serial.printf("Setting flow %c to %d\n", flowToSet, flow);
@@ -403,6 +406,7 @@ QueueHandle_t handle_command_queue;
 QueueHandle_t handle_command_response_queue;
 QueueHandle_t handle_data_queue;
 
+SemaphoreHandle_t  i2cMutex;
 
 void initDrivers()
 {
@@ -410,9 +414,9 @@ void initDrivers()
   i2cMux.begin();
   i2cMux.closeAll();
   mcp.begin();
-  mcp.setChannelValue(SORBENT_VALVE_CHANNEL,0);
-  mcp.setChannelValue(AEROSOL_VALVE_CHANNEL,0);
-  mcp.setChannelValue(CARBON_VALVE_CHANNEL,0);
+  mcp.setChannelValue(gas_VALVE_CHANNEL,0);
+  mcp.setChannelValue(oa_VALVE_CHANNEL,0);
+  mcp.setChannelValue(am_VALVE_CHANNEL,0);
   now = rtc.now();
   co2.open(19200, &now, 1);
   selectorValves.init();
@@ -449,6 +453,9 @@ void setup()
 
   vSetErrorLed(ERROR_LED_PIN, ERROR_LED_LIGHTUP_STATE);
   vSetErrorSerial(&Serial);
+
+  // Create mutual exclusion semaphore for I2C bus
+  i2cMutex = xSemaphoreCreateMutex();
 
   // Create the threads that will be managed by the rtos
   // Sets the stack size and priority of each task

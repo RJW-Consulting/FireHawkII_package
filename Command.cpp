@@ -1,4 +1,5 @@
 #include "Command.h"
+
         
         
 
@@ -21,14 +22,14 @@ void Command::setFlow(FH_CommandParser::Argument *args, char *response)
 
     switch (ch)
     {
-        case 's':
-            settings.flowSorbentSetPoint = flow;
+        case 'g':
+            settings.flowGasSetPoint = flow;
+            break;
+        case 'o':
+            settings.flowOaSetPoint = flow;
             break;
         case 'a':
-            settings.flowAerosolSetPoint = flow;
-            break;
-        case 'c':
-            settings.flowCarbonSetPoint = flow;
+            settings.flowAmSetPoint = flow;
             break;
         default:
             strcpy(response, "No such channel as ");
@@ -55,12 +56,29 @@ void Command::setSampleSet(FH_CommandParser::Argument *args, char *response)
         }
         else
         {
-            selectorValves.openSet(set);
+            selectorValves.openSet(set-1);
             sprintf(rbuff,"Opened sample set %u", set);
-            strcpy(response, rbuff);
-         }
+            strcpy(response, rbuff); 
+        }
+        readings.sampleSet = set;
     }
    
+}
+
+void Command::enableLogFile(FH_CommandParser::Argument *args, char *response)
+{
+    uint64_t enable = args[0].asUInt64;
+    if (enable)
+    {
+        dataLogger.beginLogging();
+        strcpy(response, "Logging on");
+    }
+    else
+    {
+        dataLogger.stopLogging();
+        strcpy(response, "Logging off");
+    }
+
 }
 
 void Command::init()
@@ -69,6 +87,8 @@ void Command::init()
         printf("Could not register set flow command");
     if (!parser.registerCommand("ss","u", &setSampleSet))
         printf("Could not register set sample command");
+   if (!parser.registerCommand("le","u", &enableLogFile))
+        printf("Could not register enable log file command");
 
 }
 
