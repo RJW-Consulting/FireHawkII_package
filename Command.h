@@ -7,6 +7,7 @@
 #include "CommandParser.h"
 #include "DataLogger.h"
 #include "Driver_selectorValves.h"
+#include "Driver_ProportionalValve.h"
 
 
 #define CP_COMMANDS 16
@@ -20,7 +21,17 @@ typedef CommandParser<> FH_CommandParser;
 
 extern Driver_selectorValves selectorValves;
 
+extern Driver_ProportionalValve gasValve;
+extern Driver_ProportionalValve oaValve;
+extern Driver_ProportionalValve amValve;
+
 extern DataLogger dataLogger;
+
+#define COMMAND_RESPONSE_MAX_SIZE 128 
+
+// command response buffer needs to be global due to static nature of 
+// command parser command handlers
+extern char responseBuff[COMMAND_RESPONSE_MAX_SIZE];
 
 class Command
 {
@@ -28,14 +39,25 @@ class Command
         void init();
         void tick();
         void checkAndParseCommandLine(String commandLine);
-
+        // command public methods
+        bool setFlow(char ch, uint64_t flow);
+        bool setSampleSet(uint set);
+        bool enableLogFile(bool enable);
+        bool setPIDk(char pid, char kConst, double value);
+        bool setFlowManual(char pid, int64_t value);
+        bool saveSettings();
+        bool setPumpSpeed(int64_t value);
     private:
         FH_CommandParser parser;
-        char responseBuff[FH_CommandParser::MAX_RESPONSE_SIZE];
-        // command handlers
+        void respondOK();
+        // command handler wrappers (overloads) for command parser
         static void setFlow(FH_CommandParser::Argument *args, char *response);
         static void setSampleSet(FH_CommandParser::Argument *args, char *response);
         static void enableLogFile(FH_CommandParser::Argument *args, char *response);
+        static void setPIDk(FH_CommandParser::Argument *args, char *response);
+        static void setFlowManual(FH_CommandParser::Argument *args, char *response);
+        static void saveSettings(FH_CommandParser::Argument *args, char *response);
+        static void setPumpSpeed(FH_CommandParser::Argument *args, char *response);
 };
 
 #endif

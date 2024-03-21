@@ -8,7 +8,6 @@ DataLogger::DataLogger()
 void DataLogger::init()
 {
     initSDCard();
-    ini = new minIni("settings.ini");
     loadSettings();
 }
 
@@ -37,25 +36,61 @@ void DataLogger::loadSettings()
         stopLogging();
         wasLogging = true;
     }
-    settings.droneRadioAddress = ini->getl(section, "droneRadioAddress", 1);
-    settings.stationRadioAddress = ini->getl(section, "stationRadioAddress", 1);
-    settings.flowGasSetPoint = ini->getl(section, "flowGasSetPoint", 1); 
-    settings.flowOaSetPoint = ini->getl(section, "flowOaSetPoint", 1); 
-    settings.flowAmSetPoint = ini->getl(section, "flowAmSetPoint", 1);
-    settings.gasPIDKp = ini->getf(section, "gasPIDKp", 0.01);    
-    settings.gasPIDKi = ini->getf(section, "gasPIDKi", 0.5);
-    settings.gasPIDKd = ini->getf(section, "gasPIDKd", 0.01);
-    settings.oaPIDKp = ini->getf(section, "oaPIDKp", 0.01);    
-    settings.oaPIDKi = ini->getf(section, "oaPIDKi", 0.5);
-    settings.oaPIDKd = ini->getf(section, "oaPIDKd", 0.01);
-    settings.amPIDKp = ini->getf(section, "amPIDKp", 0.01);    
-    settings.amPIDKi = ini->getf(section, "amPIDKi", 0.5);
-    settings.amPIDKd = ini->getf(section, "amPIDKd", 0.01);
+    minIni ini("settings.ini");
+    settings.droneRadioAddress = ini.getl(section, "droneRadioAddress", 1);
+    settings.stationRadioAddress = ini.getl(section, "stationRadioAddress", 1);
+    settings.flowGasSetPoint = ini.getl(section, "flowGasSetPoint", 1); 
+    settings.flowOaSetPoint = ini.getl(section, "flowOaSetPoint", 1); 
+    settings.flowAmSetPoint = ini.getl(section, "flowAmSetPoint", 1);
+    settings.samplePumpSpeed = ini.getl(section, "samplePumpSpeed", 100);
+    settings.gasPIDKp = ini.getf(section, "gasPIDKp", 0.01);    
+    settings.gasPIDKi = ini.getf(section, "gasPIDKi", 0.5);
+    settings.gasPIDKd = ini.getf(section, "gasPIDKd", 0.01);
+    settings.oaPIDKp = ini.getf(section, "oaPIDKp", 0.01);    
+    settings.oaPIDKi = ini.getf(section, "oaPIDKi", 0.5);
+    settings.oaPIDKd = ini.getf(section, "oaPIDKd", 0.01);
+    settings.amPIDKp = ini.getf(section, "amPIDKp", 0.01);    
+    settings.amPIDKi = ini.getf(section, "amPIDKi", 0.5);
+    settings.amPIDKd = ini.getf(section, "amPIDKd", 0.01);
 
     if (wasLogging)
     {
         beginLogging();
     }
+}
+
+bool DataLogger::saveSettings()
+{
+    bool wasLogging = false;
+    if (logFileName != "")
+    {
+        stopLogging();
+        wasLogging = true;
+    }
+    minIni ini("settings.ini");
+    bool success = true;
+    success &= ini.put(section, "droneRadioAddress", (int) settings.droneRadioAddress);
+    success &= ini.put(section, "stationRadioAddress", (int) settings.stationRadioAddress);
+    success &= ini.put(section, "flowGasSetPoint", (long) settings.flowGasSetPoint); 
+    success &= ini.put(section, "flowOaSetPoint", (long) settings.flowOaSetPoint); 
+    success &= ini.put(section, "flowAmSetPoint", (long) settings.flowAmSetPoint);
+    success &= ini.put(section, "samplePumpSpeed", (int) settings.samplePumpSpeed);
+    success &= ini.put(section, "gasPIDKp", (INI_REAL) settings.gasPIDKp);    
+    success &= ini.put(section, "gasPIDKi", (INI_REAL) settings.gasPIDKi);
+    success &= ini.put(section, "gasPIDKd", (INI_REAL)settings.gasPIDKd);
+    success &= ini.put(section, "oaPIDKp", (INI_REAL) settings.oaPIDKp);    
+    success &= ini.put(section, "oaPIDKi", (INI_REAL) settings.oaPIDKi);
+    success &= ini.put(section, "oaPIDKd", (INI_REAL) settings.oaPIDKd);
+    success &= ini.put(section, "amPIDKp", (INI_REAL) settings.amPIDKp);    
+    success &= ini.put(section, "amPIDKi", (INI_REAL) settings.amPIDKi);
+    success &= ini.put(section, "amPIDKd", (INI_REAL) settings.amPIDKd);
+
+    if (wasLogging)
+    {
+        beginLogging();
+    }
+
+    return success;
 }
 
 void DataLogger::setDateTime(DateTime *sysDateTime)
@@ -236,6 +271,12 @@ String DataLogger::buildLogString()
     line += String(readings.pressure1,2);
     line += ",";
     line += String(readings.pressure2,2);
+    line += ",";
+    line += String(gasValve.getValveSetting());
+    line += ",";
+    line += String(oaValve.getValveSetting());
+    line += ",";
+    line += String(amValve.getValveSetting());
     line += "*/\n";
 
     return line;

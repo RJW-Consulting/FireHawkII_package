@@ -8,12 +8,12 @@
                     "alarm": 0,
                     "fft": false,
                     "fftSamples": 1024,
-                    "graph": true,
+                    "graph": false,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
-                    "title": "Setpoint-Sorbent",
+                    "title": "Setpoint-Gas",
                     "units": "SCCM",
                     "value": "%5",
                     "widget": ""
@@ -27,7 +27,7 @@
                     "log": false,
                     "max": 0,
                     "min": 0,
-                    "title": "Flow-Sorbent",
+                    "title": "Flow-Gas",
                     "units": "SCCM",
                     "value": "%6",
                     "widget": ""
@@ -36,12 +36,12 @@
                     "alarm": 0,
                     "fft": false,
                     "fftSamples": 1024,
-                    "graph": true,
+                    "graph": false,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
-                    "title": "Setpoint-Aerosol",
+                    "title": "Setpoint-Organic Aerosol",
                     "units": "",
                     "value": "%7",
                     "widget": ""
@@ -55,7 +55,7 @@
                     "log": false,
                     "max": 0,
                     "min": 0,
-                    "title": "Flow-Aerosol",
+                    "title": "Flow-Organic Aerosol",
                     "units": "SCCM",
                     "value": "%8",
                     "widget": ""
@@ -64,12 +64,12 @@
                     "alarm": 0,
                     "fft": false,
                     "fftSamples": 1024,
-                    "graph": true,
+                    "graph": false,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
-                    "title": "Setpoint-Carbon",
+                    "title": "Setpoint-Aerosol Mass",
                     "units": "SCCM",
                     "value": "%9",
                     "widget": ""
@@ -97,7 +97,7 @@
                     "log": false,
                     "max": 0,
                     "min": 0,
-                    "title": "Flow-Carbon",
+                    "title": "Flow-Aerosol Mass",
                     "units": "",
                     "value": "%10",
                     "widget": ""
@@ -139,6 +139,54 @@
             ],
             "title": "Measures",
             "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "valve g setting",
+                    "units": "",
+                    "value": "%25",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "valve o setting",
+                    "units": "",
+                    "value": "%26",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "valve a setting",
+                    "units": "",
+                    "value": "%27",
+                    "widget": ""
+                }
+            ],
+            "title": "Valve settings",
+            "widget": "multiplot"
         }
     ],
     "separator": "",

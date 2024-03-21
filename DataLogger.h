@@ -8,6 +8,7 @@
 #include "minIni.h"
 #include "RTClib.h"
 #include "Driver_ppsystemsCO2.h"
+#include "Driver_ProportionalValve.h"
 
 
 #define SD_CARD_CS 10                                   
@@ -18,6 +19,7 @@ class DataLogger
         DataLogger();
         void init();
         void loadSettings();
+        bool saveSettings();
         void setDateTime(DateTime *sysDateTime);
         void setCO2Driver(Driver_ppsystemsCO2 *sysCO2Driver);
         void setIntervalSecs(uint16_t intervalSecs);
@@ -27,7 +29,6 @@ class DataLogger
 
     private:
         String logFileName;
-        minIni *ini;
         File currentFile;
         DateTime *systemTime;
         DateTime lastLogTime;
@@ -40,5 +41,9 @@ class DataLogger
         void fillDataPacket(struct DataPacket *packet);
         bool initSDCard();
 };
+
+extern Driver_ProportionalValve gasValve;
+extern Driver_ProportionalValve oaValve;
+extern Driver_ProportionalValve amValve;
 
 #endif

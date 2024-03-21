@@ -36,6 +36,7 @@ struct Settings {
     bool autoSampleCollecting;
     bool samplePumpOn;
     bool co2PumpOn;
+    uint samplePumpSpeed;
     uint stationRadioAddress;
     uint droneRadioAddress;
     char co2State;
@@ -87,5 +88,10 @@ extern struct Settings settings;
 extern SemaphoreHandle_t  i2cMutex;
 extern QueueHandle_t handle_command_queue;
 extern QueueHandle_t handle_data_queue;
+
+#define MAXFLOW_GAS 1000
+#define MAXFLOW_OA  6000
+#define MAXFLOW_AM  6000
+
 
 #endif

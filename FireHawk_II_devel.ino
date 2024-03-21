@@ -19,13 +19,16 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include <arduino.h>
 #include <Adafruit_INA219.h>
 #include <Adafruit_NeoPixel.h>
+#include <Adafruit_ADS1X15.h>
 #include <rp2040_pio.h>
 #include <TCA9548A-SOLDERED.h>
+#include <Adafruit_I2CDevice.h>
 #include "RTClib.h"
 #include "Driver_ppsystemsCO2.h"
 #include "Driver_selectorValves.h"
 #include "Driver_StatusLED.h"
 #include "Driver_ProportionalValve.h"
+#include "Driver_Pump.h"
 #include "Driver_mprls.h"
 #include "Control.h"
 #include "Command.h"
@@ -78,10 +81,13 @@ void myDelayMsUntil(TickType_t *previousWakeTime, int ms)
 #define gas_VALVE_CHANNEL MCP4728_CHANNEL_A
 #define oa_VALVE_CHANNEL MCP4728_CHANNEL_B
 #define am_VALVE_CHANNEL MCP4728_CHANNEL_C
+#define PUMP_CHANNEL MCP4728_CHANNEL_D
 #define gas_FLOW_MUX_CHANNEL 0
 #define oa_FLOW_MUX_CHANNEL 1
 #define am_FLOW_MUX_CHANNEL 2
 #define FLOW_SENSOR_I2C 0x07
+#define FLOW_ADC_I2C 0x48
+#define am_FLOW_ADC_CHANNEL 0x0
 #define PSENSOR1_MUX_CHANNEL 0x04
 #define PSENSOR2_MUX_CHANNEL 0x05
 
@@ -95,6 +101,7 @@ uint32_t msClock = 0;
 RTC_PCF8523 rtc;
 Adafruit_INA219 ina219;
 Adafruit_MCP4728 mcp;
+Adafruit_ADS1115 ads1115_a;
 int flowAOPin = A0;                               
 
 Driver_ppsystemsCO2 co2;
@@ -104,30 +111,68 @@ TCA9548A i2cMux;
 PressureSensor p1(&i2cMux, PSENSOR1_MUX_CHANNEL, &readings.pressure1);
 PressureSensor p2(&i2cMux, PSENSOR2_MUX_CHANNEL, &readings.pressure2);
 
+#define PID_PERIOD 5
+
+//#define USE_HONEYWELL_FLOW 1
+
 Driver_ProportionalValve gasValve(
                   &mcp, 
                   &i2cMux, 
                   gas_FLOW_MUX_CHANNEL,
                   FLOW_SENSOR_I2C,
+                  &ads1115_a,
+                  0,
                   gas_VALVE_CHANNEL,
                   &settings.flowGasSetPoint,
-                  &readings.flowGas);
+                  &readings.flowGas,
+                  &settings.gasPIDKp,
+                  &settings.gasPIDKi,
+                  &settings.gasPIDKd,
+                  'g',
+                  PID_PERIOD
+                  );
 Driver_ProportionalValve oaValve(
                   &mcp, 
                   &i2cMux, 
                   oa_FLOW_MUX_CHANNEL,
                   FLOW_SENSOR_I2C,
+                  &ads1115_a,
+                  0,
                   oa_VALVE_CHANNEL,
                   &settings.flowOaSetPoint,
-                  &readings.flowOa);
+                  &readings.flowOa,
+                  &settings.oaPIDKp,
+                  &settings.oaPIDKi,
+                  &settings.oaPIDKd,
+                  'o',
+                  PID_PERIOD
+                  );
 Driver_ProportionalValve amValve(
                   &mcp, 
                   &i2cMux, 
                   am_FLOW_MUX_CHANNEL,
+#ifdef  USE_HONEYWELL_FLOW
+                  0,
+#else     
                   FLOW_SENSOR_I2C,
+#endif
+                  &ads1115_a,
+                  am_FLOW_ADC_CHANNEL,
                   am_VALVE_CHANNEL,
                   &settings.flowAmSetPoint,
-                  &readings.flowAm);
+                  &readings.flowAm,
+                  &settings.amPIDKp,
+                  &settings.amPIDKi,
+                  &settings.amPIDKd,
+                  'a',
+                  PID_PERIOD
+                  );
+
+Driver_Pump pump(
+                  &mcp, 
+                  PUMP_CHANNEL,
+                  &settings.samplePumpOn,
+                  &settings.samplePumpSpeed);
 
 // Major system components available globally
 DataLogger dataLogger;
@@ -161,10 +206,11 @@ static void task_driver_tick(void *pvParameters)
       co2.tick();
       selectorValves.tick();
       dataLogger.tick();
+      pump.tick();
       gasValve.tick();
       oaValve.tick();    
       amValve.tick();
-      led.tick();
+      //led.tick();
       p1.tick();
       p2.tick();
     }
@@ -202,9 +248,6 @@ bool enablePID = true;
 static void task_test_drivers(void *pvParameters)
 {
   char inchar;
-  settings.flowGasSetPoint = 200;
-  settings.flowOaSetPoint = 0;
-  settings.flowAmSetPoint = 0;
   //gasValve.setManual(2000);
   gasValve.enablePID(enablePID);
   oaValve.enablePID(enablePID);
@@ -214,6 +257,7 @@ static void task_test_drivers(void *pvParameters)
   //amValve.setPWMpin(9);
   initialized = true;
   selectorValves.openSet(0);
+
 
   while (1)
   {
@@ -410,20 +454,55 @@ SemaphoreHandle_t  i2cMutex;
 
 void initDrivers()
 {
+  bool initialized = false;
   initRTC();
   i2cMux.begin();
   i2cMux.closeAll();
+  selectorValves.init();
+  selectorValves.setMSClock(&msClock);
   mcp.begin();
   mcp.setChannelValue(gas_VALVE_CHANNEL,0);
   mcp.setChannelValue(oa_VALVE_CHANNEL,0);
   mcp.setChannelValue(am_VALVE_CHANNEL,0);
+  mcp.setChannelValue(PUMP_CHANNEL,0);
+  initialized = ads1115_a.begin(FLOW_ADC_I2C);
+  ads1115_a.setGain(GAIN_TWOTHIRDS);
+  pump.init();
+  gasValve.init();
+  oaValve.init();
+  amValve.init();
   now = rtc.now();
   co2.open(19200, &now, 1);
-  selectorValves.init();
-  selectorValves.setMSClock(&msClock);
   led.init(STATUS_LED_PIN);  
   p1.init();
   p2.init();
+}
+
+void initGlobals()
+{
+  settings.samplePumpOn = false;
+}
+
+Adafruit_I2CDevice i2c_dev = Adafruit_I2CDevice(0x10);
+
+void i2cAddrTest() {
+  int addr;
+  while (!Serial) { delay(10); }
+  Serial.begin(115200);
+  Serial.println("I2C address detection test");
+  for (addr = 1; addr < 0xff; addr++)
+  {
+    i2c_dev = Adafruit_I2CDevice(addr);
+    if (!i2c_dev.begin()) {
+      Serial.print("Did not find device at 0x");
+      Serial.println(i2c_dev.address(), HEX);
+    }
+    else
+    {
+      Serial.print("Device found on address 0x");
+      Serial.println(i2c_dev.address(), HEX);
+    }
+  }
 }
 
 // the setup routine runs once when you press reset:
@@ -445,6 +524,8 @@ void setup()
   digitalWrite(8,HIGH);
 
   dataLogger.init();
+  initGlobals();
+  //i2cAddrTest();
   initDrivers();
   command.init();
   dataLogger.setCO2Driver(&co2);
