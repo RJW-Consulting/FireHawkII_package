@@ -38,6 +38,7 @@ void Driver_ppsystemsCO2::tick()
     int pos = inText.indexOf('\n');
     if (pos >= 0)
     {
+      Serial.println(inText);
       co2message = inText.substring(0,pos+1);
       inText = inText.substring(pos + 1);
     }
@@ -94,12 +95,14 @@ bool Driver_ppsystemsCO2::receivedMeasurement()
 
       //Serial.print(measurementString);
       if (parseMeasurement(measurementString))
-      this->state = CO2_STATE_MEASURING;
-      this->lastMessageTime = *(this->nowPtr);
-      this->lastReadingTime = *(this->nowPtr);
-      this->co2message = "";
-      readings.coConc = lastCO2Reading;
-      ret = true;
+      {
+        this->state = CO2_STATE_MEASURING;
+        this->lastMessageTime = *(this->nowPtr);
+        this->lastReadingTime = *(this->nowPtr);
+        this->co2message = "";
+        readings.coConc = lastCO2Reading;
+        ret = true;
+      }
     }
   }
   return ret;
@@ -115,15 +118,12 @@ bool Driver_ppsystemsCO2::parseMeasurement(String instr)
     if (i > 0)  startAt = parts[i-1]+1;
     parts[i] = instr.indexOf(' ', startAt);
     if (parts[i] == -1)
-      return false;
+      break;
   }
-  String lreading = instr.substring(parts[2],parts[3]);
-  //Serial.print("lreading = '");
-  //Serial.print(lreading);
-  //Serial.println("'");
+  String lreading = instr.substring(parts[0]+1);
   this->lastCO2Reading = lreading.toFloat();
-  lreading = instr.substring(parts[3],parts[4]);
-  this->lastIRGATemperature = lreading.toFloat();
+  //lreading = instr.substring(parts[3],parts[4]);
+  //this->lastIRGATemperature = lreading.toFloat();
   this->lastReadingTime = *(this->nowPtr);
   return true;
 }

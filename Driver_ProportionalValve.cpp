@@ -32,7 +32,7 @@ Driver_ProportionalValve::Driver_ProportionalValve(
   enabled = false;
   //pid = &PID(readback, &valveSetting, setpoint, kp, ki, kd, DIRECT);
   pid = new PID(readback, &valveSetting, setpoint, *kp, *ki, *kd, 0);
-  pid->SetOutputLimits(MIN_DAC, MAX_DAC);
+  pid->SetOutputLimits(MIN_DAC, MAX_PROP_VALVE_DAC);
   pid->SetMode(AUTOMATIC);
   pidPeriod = period;
   periodCount = 0;
@@ -93,6 +93,7 @@ int Driver_ProportionalValve::getMeanFlow()
 }
 
 /* code for Honeywell flow sensor with analog output */
+/* Table for flow/voltage conversion.  Must linear interpolate between table entries */
 
 static std::vector<FlowData> flowTable = {
     {0, 1.00},
@@ -125,7 +126,13 @@ double Driver_ProportionalValve::calculateFlowRate(double voltage, const std::ve
 {
     double retValue = -1;
     // Check if voltage is outside the range
-    if (voltage < flowTable.front().voltage_vdc || voltage > flowTable.back().voltage_vdc) {
+    if (voltage < flowTable.front().voltage_vdc)
+    {
+      return 0;
+    } 
+    
+    if (voltage > flowTable.back().voltage_vdc) 
+    {
         //std::cerr << "Input voltage is out of range!" << std::endl;
         return -1; // Error code
     }
@@ -204,6 +211,7 @@ void Driver_ProportionalValve::setValvePower(int power)
 void Driver_ProportionalValve::tick()
 {
   // 
+  double flow = getFlow();
   if (FLOW_BUFFER_SIZE > 0)
   {
     addFlowPoint(flow);

@@ -305,6 +305,16 @@ bool Command::setFlowManual(char pid, int64_t value)
     return retval;
 }
 
+void Command::zeroCO2()
+{
+    co2.startZero();
+}
+
+void Command::zeroCO2(FH_CommandParser::Argument *args, char *response)
+{
+    command.zeroCO2();
+}
+
 void Command::init()
 {
     if (!parser.registerCommand("sf","su", &setFlow))
@@ -321,5 +331,7 @@ void Command::init()
         printf("Could not register save settings to file command");
     if (!parser.registerCommand("ps","u", &setPumpSpeed))
         printf("Could not register set pump speed command");
+    if (!parser.registerCommand("zco2","", &zeroCO2))
+        printf("CO2 zero cycle started");
 }
 

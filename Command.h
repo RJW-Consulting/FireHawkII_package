@@ -8,7 +8,7 @@
 #include "DataLogger.h"
 #include "Driver_selectorValves.h"
 #include "Driver_ProportionalValve.h"
-
+#include "Driver_ppsystemsCO2.h"
 
 #define CP_COMMANDS 16
 #define CP_COMMAND_ARGS 4
@@ -24,6 +24,8 @@ extern Driver_selectorValves selectorValves;
 extern Driver_ProportionalValve gasValve;
 extern Driver_ProportionalValve oaValve;
 extern Driver_ProportionalValve amValve;
+
+extern Driver_ppsystemsCO2 co2;
 
 extern DataLogger dataLogger;
 
@@ -47,6 +49,7 @@ class Command
         bool setFlowManual(char pid, int64_t value);
         bool saveSettings();
         bool setPumpSpeed(int64_t value);
+        void zeroCO2();
     private:
         FH_CommandParser parser;
         void respondOK();
@@ -58,6 +61,7 @@ class Command
         static void setFlowManual(FH_CommandParser::Argument *args, char *response);
         static void saveSettings(FH_CommandParser::Argument *args, char *response);
         static void setPumpSpeed(FH_CommandParser::Argument *args, char *response);
+        static void zeroCO2(FH_CommandParser::Argument *args, char *response);
 };
 
 #endif

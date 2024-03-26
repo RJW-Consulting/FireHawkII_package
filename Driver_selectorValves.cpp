@@ -42,12 +42,10 @@ void Driver_selectorValves::closeGang(int gang)
     doUpdate = true;
 }
 
-
 void Driver_selectorValves::setHitTime(uint32_t  msecs)
 {
     this->hitTime = msecs;
 }
-
 
 void Driver_selectorValves::setHoldPct(int pct)
 {
@@ -58,7 +56,6 @@ void Driver_selectorValves::setHitPct(int pct)
 {
     this->hitDutyCycle = pct;
 }
-
 
 uint8_t Driver_selectorValves::getvalveState(int gang, int valve)
 {

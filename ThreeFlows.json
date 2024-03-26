@@ -1,5 +1,6 @@
 {
     "frameEnd": "",
+    "frameParser": "/* \r\n * @brief Frame parsing function, you can modify this to suit your needs.\r\n * \r\n * By customizing this code, you can use a single JSON project file to \r\n * process different kinds of frames that are sent by the microcontroller \r\n * or any data source that is connected to Serial Studio. Frame parsing code\r\n * is specific to every JSON project that you create.\r\n *\r\n * @param frame      string with the latest received frame.\r\n * @param separator  data separator sequence defined by the JSON project.\r\n *\r\n * @note.            only data that is *inside* the data delimiters will\r\n *                   be processed by the frame parser.\r\n *\r\n * @note             you can safely declare global variables outside the\r\n *                   @c parse() function.\r\n */\r\nfunction parse(frame, separator) {\r\n    return frame.split(separator);\r\n}",
     "frameStart": "",
     "groups": [
         {
@@ -9,13 +10,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": false,
+                    "index": 5,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "Setpoint-Gas",
                     "units": "SCCM",
-                    "value": "%5",
+                    "value": "",
                     "widget": ""
                 },
                 {
@@ -23,13 +25,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
+                    "index": 6,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "Flow-Gas",
                     "units": "SCCM",
-                    "value": "%6",
+                    "value": "",
                     "widget": ""
                 },
                 {
@@ -37,13 +40,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": false,
+                    "index": 7,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "Setpoint-Organic Aerosol",
                     "units": "",
-                    "value": "%7",
+                    "value": "",
                     "widget": ""
                 },
                 {
@@ -51,13 +55,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
+                    "index": 8,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "Flow-Organic Aerosol",
                     "units": "SCCM",
-                    "value": "%8",
+                    "value": "",
                     "widget": ""
                 },
                 {
@@ -65,13 +70,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": false,
+                    "index": 9,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "Setpoint-Aerosol Mass",
                     "units": "SCCM",
-                    "value": "%9",
+                    "value": "",
                     "widget": ""
                 },
                 {
@@ -79,13 +85,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": false,
+                    "index": 0,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "nada",
                     "units": "",
-                    "value": "%10",
+                    "value": "",
                     "widget": ""
                 },
                 {
@@ -93,13 +100,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
+                    "index": 10,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "Flow-Aerosol Mass",
                     "units": "",
-                    "value": "%10",
+                    "value": "",
                     "widget": ""
                 }
             ],
@@ -113,13 +121,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
+                    "index": 0,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "CO2",
                     "units": "",
-                    "value": "%12",
+                    "value": "",
                     "widget": ""
                 },
                 {
@@ -127,13 +136,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": false,
+                    "index": 0,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "SampleSet",
                     "units": "",
-                    "value": "%2",
+                    "value": "",
                     "widget": ""
                 }
             ],
@@ -147,13 +157,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
+                    "index": 0,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "valve g setting",
                     "units": "",
-                    "value": "%25",
+                    "value": "",
                     "widget": ""
                 },
                 {
@@ -161,13 +172,14 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
+                    "index": 0,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "valve o setting",
                     "units": "",
-                    "value": "%26",
+                    "value": "",
                     "widget": ""
                 },
                 {
@@ -175,17 +187,84 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
+                    "index": 0,
                     "led": false,
                     "log": false,
                     "max": 0,
                     "min": 0,
                     "title": "valve a setting",
                     "units": "",
-                    "value": "%27",
+                    "value": "",
                     "widget": ""
                 }
             ],
             "title": "Valve settings",
+            "widget": "multiplot"
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "index": 8,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "OA Flow",
+                    "units": "",
+                    "value": "",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "index": 10,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "AM Flow",
+                    "units": "",
+                    "value": "",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "index": 26,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "OA DAC",
+                    "units": "",
+                    "value": "",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "index": 27,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "AM DAC",
+                    "units": "",
+                    "value": "",
+                    "widget": ""
+                }
+            ],
+            "title": "flow vs DAC",
             "widget": "multiplot"
         }
     ],

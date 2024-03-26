@@ -12,7 +12,7 @@
 #include <PID_v1.h>
 #include "globals.h"
 
-#define FLOW_BUFFER_SIZE 0
+#define FLOW_BUFFER_SIZE 4
 
 #define ANALOG_FLOW_TABLE_SIZE 6
 
@@ -86,5 +86,6 @@ class Driver_ProportionalValve
 
 #define MIN_DAC 0
 #define MAX_DAC 4095
+#define MAX_PROP_VALVE_DAC 4000
 
 #endif

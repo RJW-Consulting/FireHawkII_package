@@ -86,8 +86,11 @@ void myDelayMsUntil(TickType_t *previousWakeTime, int ms)
 #define oa_FLOW_MUX_CHANNEL 1
 #define am_FLOW_MUX_CHANNEL 2
 #define FLOW_SENSOR_I2C 0x07
-#define FLOW_ADC_I2C 0x48
-#define am_FLOW_ADC_CHANNEL 0x0
+#define GAS_SENSOR_ADC_I2C 0x48
+#define FLOW_ADC_I2C 0x49
+#define gas_FLOW_ADC_CHANNEL 0x0
+#define oa_FLOW_ADC_CHANNEL 0x1
+#define am_FLOW_ADC_CHANNEL 0x2
 #define PSENSOR1_MUX_CHANNEL 0x04
 #define PSENSOR2_MUX_CHANNEL 0x05
 
@@ -102,6 +105,7 @@ RTC_PCF8523 rtc;
 Adafruit_INA219 ina219;
 Adafruit_MCP4728 mcp;
 Adafruit_ADS1115 ads1115_a;
+Adafruit_ADS1115 ads1115_b;
 int flowAOPin = A0;                               
 
 Driver_ppsystemsCO2 co2;
@@ -111,7 +115,7 @@ TCA9548A i2cMux;
 PressureSensor p1(&i2cMux, PSENSOR1_MUX_CHANNEL, &readings.pressure1);
 PressureSensor p2(&i2cMux, PSENSOR2_MUX_CHANNEL, &readings.pressure2);
 
-#define PID_PERIOD 5
+#define PID_PERIOD 1
 
 //#define USE_HONEYWELL_FLOW 1
 
@@ -119,9 +123,9 @@ Driver_ProportionalValve gasValve(
                   &mcp, 
                   &i2cMux, 
                   gas_FLOW_MUX_CHANNEL,
-                  FLOW_SENSOR_I2C,
-                  &ads1115_a,
                   0,
+                  &ads1115_b,
+                  gas_FLOW_ADC_CHANNEL,
                   gas_VALVE_CHANNEL,
                   &settings.flowGasSetPoint,
                   &readings.flowGas,
@@ -135,9 +139,9 @@ Driver_ProportionalValve oaValve(
                   &mcp, 
                   &i2cMux, 
                   oa_FLOW_MUX_CHANNEL,
-                  FLOW_SENSOR_I2C,
-                  &ads1115_a,
                   0,
+                  &ads1115_b,
+                  oa_FLOW_ADC_CHANNEL,
                   oa_VALVE_CHANNEL,
                   &settings.flowOaSetPoint,
                   &readings.flowOa,
@@ -151,12 +155,8 @@ Driver_ProportionalValve amValve(
                   &mcp, 
                   &i2cMux, 
                   am_FLOW_MUX_CHANNEL,
-#ifdef  USE_HONEYWELL_FLOW
                   0,
-#else     
-                  FLOW_SENSOR_I2C,
-#endif
-                  &ads1115_a,
+                  &ads1115_b,
                   am_FLOW_ADC_CHANNEL,
                   am_VALVE_CHANNEL,
                   &settings.flowAmSetPoint,
@@ -269,155 +269,6 @@ static void task_test_drivers(void *pvParameters)
       String cmdLine = cline;
       command.checkAndParseCommandLine(cmdLine);
     }
-    /**
-      inchar = Serial.read(); 
-      Serial.print(inchar);
-      if (inchar == '|')
-      {
-        direct = !direct;
-        if (direct)
-          Serial.println("DIRECT");
-        else
-          Serial.println("PROCESSING");
-        inchar = 0;
-      }
-      if (inchar == '^')
-      {
-        setFlow = !setFlow;
-        if (setFlow)
-          Serial.println("SETFLOW");
-        else
-          Serial.println("REGULAR");
-        inchar = 0;
-      }
-
-      if (inchar == 'Z')
-      {
-        co2.startZero();
-        inchar = 0;
-      } 
-      if (inchar == 'T')
-      {
-        initRTC(true);
-        inchar = 0;
-      } 
-      if (setFlow)
-      {
-        if (checkFlowSet.indexOf(String(inchar)) > -1)
-        {
-          flowToSet = inchar;
-          Serial.printf("flow setting %c\n",flowToSet);
-          inchar = 0;
-          co2outstr = "";
-          continue;
-        }
-      }
-      if ((inchar == '\r') || (inchar == '\n')) 
-      {
-        String sets = "123";
-        if ((co2outstr.length() == 1) && (sets.indexOf(co2outstr.charAt(0)) > -1))
-        {
-          switch (co2outstr.charAt(0))
-          {
-            case '1':
-              printf("Opening set 1\n");
-              selectorValves.openSet(0);
-              break;
-            case '2':
-              printf("Opening set 2\n");
-              selectorValves.openSet(1);
-              break;
-            case '3':
-              printf("Opening set 1\n");
-              selectorValves.openSet(2);
-              break;
-          }
-          co2outstr = "";
-        }
-        else if (setFlow && (co2outstr.length() > 0))
-        {
-          int flow = co2outstr.toInt();
-          co2outstr = "";
-          switch (flowToSet)
-          {
-            case 's':
-              settings.flowGasSetPoint = flow;
-              //gasValve.setManual(flow);
-              break;
-            case 'a':
-              settings.flowOaSetPoint = flow;
-              //oaValve.setManual(flow);
-              break;
-            case 'c':
-              settings.flowAmSetPoint = flow;
-              //amValve.setManual(flow);
-              break;
-          }
-          Serial.printf("Setting flow %c to %d\n", flowToSet, flow);
-        }
-        else
-        {
-          Serial.print("Sending '"); Serial.print(co2outstr); Serial.println("'");
-          co2.send(co2outstr);
-          co2outstr = "";
-        }
-      }
-      else
-      {
-        if (inchar)
-          co2outstr += inchar;
-      }
-    }
-    if (!direct)
-    {
-      DateTime btime = co2.getMeasurementTime();
-      //Serial.printf("state = %c\n",co2.getState());
-      /*
-      if (co2.getState() == CO2_STATE_MEASURING)
-      {
-        DateTime mTime;
-        float measurement = co2.getMeasurement(mTime);
-        Serial.print(mTime.timestamp());
-        Serial.print(": ");
-        Serial.print(measurement);
-        Serial.println (" ppm CO2");
-
-      }
-      else if (co2.getState() == CO2_STATE_ZERO)
-      {
-        Serial.printf("Zeroing, second %d of %d\n", co2.getZeroSec(), co2.getZeroEndSec());
-      }
-      else if (co2.getState() == CO2_STATE_WARMUP)
-      {
-        Serial.printf("Warming up, IRGA temperature %.1f\n", co2.getTemperature());
-      }
-      
-    }
-    else
-    {  
-      if (co2.receiveAvailable())
-      {
-        while(co2.receiveAvailable())
-        {
-          co2.receive(co2instr);
-        }
-        Serial.print(co2instr);
-        Serial.print("|");
-        co2instr = "";
-      }
-    }
-    /*
-    valveCount++;
-    if (valveCount >= 5)
-    {
-      valveState = !valveState;
-      if (valveState)
-        selectorValves.openValve(0,0);
-      else
-        selectorValves.closeGang(0);
-      valveCount = 0;
-    }
-    */
     switch (co2.getState())
     {
       case CO2_STATE_MEASURING:
@@ -465,8 +316,10 @@ void initDrivers()
   mcp.setChannelValue(oa_VALVE_CHANNEL,0);
   mcp.setChannelValue(am_VALVE_CHANNEL,0);
   mcp.setChannelValue(PUMP_CHANNEL,0);
-  initialized = ads1115_a.begin(FLOW_ADC_I2C);
+  initialized = ads1115_a.begin(GAS_SENSOR_ADC_I2C);
   ads1115_a.setGain(GAIN_TWOTHIRDS);
+  initialized = ads1115_b.begin(FLOW_ADC_I2C);
+  ads1115_b.setGain(GAIN_TWOTHIRDS);
   pump.init();
   gasValve.init();
   oaValve.init();
