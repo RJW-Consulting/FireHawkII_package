@@ -38,7 +38,7 @@ void Driver_ppsystemsCO2::tick()
     int pos = inText.indexOf('\n');
     if (pos >= 0)
     {
-      Serial.println(inText);
+      //Serial.println(inText);
       co2message = inText.substring(0,pos+1);
       inText = inText.substring(pos + 1);
     }

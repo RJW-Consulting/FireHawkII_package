@@ -33,6 +33,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include "Control.h"
 #include "Command.h"
 #include "DataLogger.h"
+#include "Radio.h"
 #include "globals.h"
 
 
@@ -177,6 +178,7 @@ Driver_Pump pump(
 // Major system components available globally
 DataLogger dataLogger;
 Command command;
+Radio radio;
 
 #define INTERVAL_MS_CLOCK 1
 #define INTERVAL_DRIVER_TICK 10
@@ -213,6 +215,7 @@ static void task_driver_tick(void *pvParameters)
       //led.tick();
       p1.tick();
       p2.tick();
+      radio.tick();
     }
     myDelayMs(INTERVAL_DRIVER_TICK);
   }
@@ -358,6 +361,11 @@ void i2cAddrTest() {
   }
 }
 
+// defines for radio queue sizes
+#define RADIO_DATA_QUEUE_NUM_RECORDS 4
+#define RADIO_COMMAND_QUEUE_NUM_RECORDS 4
+#define RADIO_COMMAND_QUEUE_RECORD_SIZE 60
+
 // the setup routine runs once when you press reset:
 void setup() 
 {
@@ -381,6 +389,10 @@ void setup()
   //i2cAddrTest();
   initDrivers();
   command.init();
+  radio.init();
+
+
+  handle_data_queue = xQueueCreate( RADIO_DATA_QUEUE_NUM_RECORDS, dataLogger.dataPacketSize());
   dataLogger.setCO2Driver(&co2);
   dataLogger.setDateTime(&now);
   dataLogger.beginLogging();

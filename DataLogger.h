@@ -7,6 +7,7 @@
 #include <SD.h>
 #include "minIni.h"
 #include "RTClib.h"
+#include "FreeRTOS_SAMD21.h"
 #include "Driver_ppsystemsCO2.h"
 #include "Driver_ProportionalValve.h"
 
@@ -25,6 +26,7 @@ class DataLogger
         void setIntervalSecs(uint16_t intervalSecs);
         bool beginLogging();
         bool stopLogging();
+        uint16_t dataPacketSize();
         void tick();
 
     private:
@@ -40,10 +42,16 @@ class DataLogger
         String logicalString(bool val);
         void fillDataPacket(struct DataPacket *packet);
         bool initSDCard();
+        DataPacket packet;
+
 };
 
 extern Driver_ProportionalValve gasValve;
 extern Driver_ProportionalValve oaValve;
 extern Driver_ProportionalValve amValve;
+
+extern QueueHandle_t handle_command_queue;
+extern QueueHandle_t handle_command_response_queue;
+extern QueueHandle_t handle_data_queue;
 
 #endif

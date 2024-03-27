@@ -38,7 +38,7 @@ void DataLogger::loadSettings()
     }
     minIni ini("settings.ini");
     settings.droneRadioAddress = ini.getl(section, "droneRadioAddress", 1);
-    settings.stationRadioAddress = ini.getl(section, "stationRadioAddress", 1);
+    settings.stationRadioAddress = ini.getl(section, "stationRadioAddress", 0);
     settings.flowGasSetPoint = ini.getl(section, "flowGasSetPoint", 1); 
     settings.flowOaSetPoint = ini.getl(section, "flowOaSetPoint", 1); 
     settings.flowAmSetPoint = ini.getl(section, "flowAmSetPoint", 1);
@@ -160,6 +160,11 @@ void DataLogger::tick()
         String logLine = buildLogString();
         if (Serial.availableForWrite())
             Serial.println(logLine);
+
+        // Send data to radio data queue
+        fillDataPacket(&packet);
+        xQueueSend(handle_data_queue, &packet, portMAX_DELAY);
+
         if (logFileName != "")
         {
             currentFile.write(logLine.c_str());
@@ -280,6 +285,11 @@ String DataLogger::buildLogString()
     line += "*/\n";
 
     return line;
+}
+
+uint16_t DataLogger::dataPacketSize()
+{
+    return sizeof(DataPacket);
 }
 
 void DataLogger::fillDataPacket(struct DataPacket *packet)
