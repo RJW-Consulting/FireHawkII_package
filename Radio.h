@@ -14,7 +14,7 @@ class Radio
         void tick();
 
     private:
-        DataPacket packetBuffer;
+        RadioPacket packetBuffer;
         void initHardware();
 
 };

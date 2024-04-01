@@ -27,6 +27,8 @@ class DataLogger
         bool beginLogging();
         bool stopLogging();
         uint16_t dataPacketSize();
+        String getLogDataTypes();
+        String getLogStringHeader();
         void tick();
 
     private:
@@ -38,7 +40,6 @@ class DataLogger
         Driver_ppsystemsCO2 *co2Driver;
 
         String buildLogString();
-        String getLogStringHeader();
         String logicalString(bool val);
         void fillDataPacket(struct DataPacket *packet);
         bool initSDCard();

@@ -216,6 +216,7 @@ static void task_driver_tick(void *pvParameters)
       p1.tick();
       p2.tick();
       radio.tick();
+      command.tick();
     }
     myDelayMs(INTERVAL_DRIVER_TICK);
   }
@@ -337,6 +338,7 @@ void initDrivers()
 void initGlobals()
 {
   settings.samplePumpOn = false;
+  settings.baseStationAnswering = false;
 }
 
 Adafruit_I2CDevice i2c_dev = Adafruit_I2CDevice(0x10);
@@ -361,10 +363,6 @@ void i2cAddrTest() {
   }
 }
 
-// defines for radio queue sizes
-#define RADIO_DATA_QUEUE_NUM_RECORDS 4
-#define RADIO_COMMAND_QUEUE_NUM_RECORDS 4
-#define RADIO_COMMAND_QUEUE_RECORD_SIZE 60
 
 // the setup routine runs once when you press reset:
 void setup() 
@@ -393,6 +391,8 @@ void setup()
 
 
   handle_data_queue = xQueueCreate( RADIO_DATA_QUEUE_NUM_RECORDS, dataLogger.dataPacketSize());
+  handle_command_queue = xQueueCreate( RADIO_COMMAND_QUEUE_NUM_RECORDS, RADIO_COMMAND_QUEUE_RECORD_SIZE);
+  handle_command_response_queue = xQueueCreate( RADIO_COMMAND_RESPONSE_QUEUE_NUM_RECORDS, RADIO_COMMAND_RESPONSE_QUEUE_RECORD_SIZE);
   dataLogger.setCO2Driver(&co2);
   dataLogger.setDateTime(&now);
   dataLogger.beginLogging();

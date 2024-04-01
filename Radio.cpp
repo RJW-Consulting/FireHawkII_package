@@ -41,32 +41,41 @@ void Radio::initHardware()
 
 void Radio::tick()
 {
-    if (xQueueReceive(handle_data_queue, (void *) &packetBuffer, 0))
+    if (xQueueReceive(handle_command_response_queue, (void *) &packetBuffer, 0))
     {
-        Serial.println("sending message");
+        Serial.println("sending command response");
         if (radio_manager.sendtoWait((uint8_t*) &packetBuffer, (uint8_t) sizeof(packetBuffer), settings.stationRadioAddress))
         {
-            uint8_t len = sizeof(packetBuffer);
-            uint8_t from;   
-            if (radio_manager.recvfromAckTimeout((uint8_t*) &packetBuffer, &len, 500, &from))
-            {
-                Serial.print("got reply from : 0x");
-                Serial.print(from, HEX);
-                Serial.print(": ");
-                Serial.println((char *)&packetBuffer);
-            }
-            else
-            {
-                Serial.println("No reply, is rf95_reliable_datagram_server running?");
-            }
+            Serial.println("Send Response Succeeded");        
+        }
+        else
+        {
+            Serial.println("Send Response Failed");
+        }
+    }
+
+    if (xQueueReceive(handle_data_queue, (void *) &packetBuffer, 0))
+    {
+        if (radio_manager.sendtoWait((uint8_t*) &packetBuffer, (uint8_t) sizeof(packetBuffer), settings.stationRadioAddress))
+        {
+            Serial.println("Send Succeeded"); 
+            settings.baseStationAnswering = true;      
         }
         else
         {
             Serial.println("Send Failed");
+            settings.baseStationAnswering = false;      
         }
-        //radio_driver_rf95.send((uint8_t *) &packetBuffer,  (uint8_t) sizeof(packetBuffer));
-        //Serial.println("Waiting for packet to complete...");
-        //delay(10);
-        //radio_driver_rf95.waitPacketSent();
     }
+    if (radio_manager.available())
+    {
+        uint8_t len = sizeof(packetBuffer);
+        uint8_t from;
+        if (radio_manager.recvfromAck((uint8_t *) &packetBuffer, &len, &from))
+        {
+            //packetBuffer.StringPacket[len-1] = 0;
+            xQueueSend(handle_command_queue, &packetBuffer, portMAX_DELAY);
+        }
+    }
+
 };

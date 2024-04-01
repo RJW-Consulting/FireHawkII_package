@@ -8,6 +8,13 @@
 #define NUM_VALVE_GANGS 3
 #define NUM_VALVES_PER_GANG 3
 
+// defines for radio queue sizes
+#define RADIO_DATA_QUEUE_NUM_RECORDS 4
+#define RADIO_COMMAND_QUEUE_NUM_RECORDS 4
+#define RADIO_COMMAND_QUEUE_RECORD_SIZE 60
+#define RADIO_COMMAND_RESPONSE_QUEUE_NUM_RECORDS 2
+#define RADIO_COMMAND_RESPONSE_QUEUE_RECORD_SIZE 128
+
 struct Readings {
     DateTime measurementTime;
     float co2Conc;
@@ -15,7 +22,7 @@ struct Readings {
     float co2MassOa;
     float co2MassAm;
     float coConc;
-    uint coMv;
+    float coMv;
     float pressure;
     float rh;
     float airTemp;
@@ -36,6 +43,7 @@ struct Settings {
     bool autoSampleCollecting;
     bool samplePumpOn;
     bool co2PumpOn;
+    bool baseStationAnswering;
     uint samplePumpSpeed;
     uint stationRadioAddress;
     uint droneRadioAddress;
@@ -59,19 +67,20 @@ struct Settings {
 };
 
 struct DataPacket{
-    char dateTime[16];
-    uint_fast8_t sampleChannel;
-    uint_fast8_t samplePump;
-    uint_fast8_t co2Pump;
-    uint_fast16_t flowSorbant;
-    uint_fast16_t flowOa;
-    uint_fast16_t flowAm;
+    char packetType;
+    char dateTime[15];
+    uint8_t sampleChannel;
+    uint8_t samplePump;
+    uint8_t co2Pump;
+    uint16_t flowSorbant;
+    uint16_t flowOa;
+    uint16_t flowAm;
     char co2Status;
     float co2PPM;
     float co2MassGas;
     float co2MassOa;
     float co2MassAm;
-    uint coMv;
+    float coMv;
     float coConc;
     float pressure;
     float rh;
@@ -80,6 +89,16 @@ struct DataPacket{
     float batteryV;
     float pressure1;
     float pressure2;
+} __attribute__((__packed__));
+
+struct StringPacket{
+    char packetType;
+    char chars[RADIO_COMMAND_RESPONSE_QUEUE_RECORD_SIZE];
+} __attribute__((__packed__));
+
+union RadioPacket{
+    struct DataPacket dataPacket;
+    struct StringPacket stringPacket;
 };
 
 extern struct Readings readings;
@@ -87,6 +106,7 @@ extern struct Settings settings;
 
 extern SemaphoreHandle_t  i2cMutex;
 extern QueueHandle_t handle_command_queue;
+extern QueueHandle_t handle_command_response_queue;
 extern QueueHandle_t handle_data_queue;
 
 #define MAXFLOW_GAS 1000

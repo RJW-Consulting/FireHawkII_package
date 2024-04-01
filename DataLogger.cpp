@@ -231,6 +231,8 @@ String DataLogger::buildLogString()
     line = "/*"; 
     line += readings.measurementTime.timestamp();
     line += ",";
+    line += String(settings.baseStationAnswering);
+    line += ",";
     line += String(readings.sampleSet);
     line += ",";
     line += logicalString(settings.samplePumpOn);
@@ -294,6 +296,7 @@ uint16_t DataLogger::dataPacketSize()
 
 void DataLogger::fillDataPacket(struct DataPacket *packet)
 {
+    packet->packetType = 'D';
     strcpy(packet->dateTime,"YYYYMMDDhhmmss");
     readings.measurementTime.toString(packet->dateTime);
     packet->sampleChannel = readings.sampleSet;
@@ -318,6 +321,22 @@ void DataLogger::fillDataPacket(struct DataPacket *packet)
     packet->pressure2 = readings.pressure2;
 }
 
+String DataLogger::getLogDataTypes()
+{
+    // return a string with a character for each data type in the 
+    // radio data packet.  Types are:
+    /*
+    char    type        bytes   descrip
+    t       dateTime    15      date and time, Ascii chars, YYYYMMDDhhmmss0
+    c       char        1       ASCII character
+    u       uint8_t     1       unsigned 8-bit int
+    U       uint16_t    2       unsigned 16-bit int
+    f       float       4       4-byte floating point 
+
+    */ 
+   String retString = "tuuuUUUcfffffffffffff";
+   return retString;
+}
 
 
 

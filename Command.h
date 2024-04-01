@@ -31,9 +31,6 @@ extern DataLogger dataLogger;
 
 #define COMMAND_RESPONSE_MAX_SIZE 128 
 
-// command response buffer needs to be global due to static nature of 
-// command parser command handlers
-extern char responseBuff[COMMAND_RESPONSE_MAX_SIZE];
 
 class Command
 {
@@ -50,6 +47,7 @@ class Command
         bool saveSettings();
         bool setPumpSpeed(int64_t value);
         void zeroCO2();
+        void sendDataPacketFormat();
     private:
         FH_CommandParser parser;
         void respondOK();
@@ -62,6 +60,9 @@ class Command
         static void saveSettings(FH_CommandParser::Argument *args, char *response);
         static void setPumpSpeed(FH_CommandParser::Argument *args, char *response);
         static void zeroCO2(FH_CommandParser::Argument *args, char *response);
+        static void sendDataPacketFormat(FH_CommandParser::Argument *args, char *response);
+        RadioPacket packet;
+        uint8_t commandBuffer[RADIO_COMMAND_QUEUE_RECORD_SIZE];
 };
 
 #endif

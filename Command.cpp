@@ -2,25 +2,33 @@
 
 // command response buffer needs to be global due to static nature of 
 // command parser command handlers        
-//char responseBuff[FH_CommandParser::MAX_RESPONSE_SIZE];        
-char responseBuff[COMMAND_RESPONSE_MAX_SIZE];        
+union RadioPacket responseBuff;
+char responseType;       
 
 extern Command command;
-
+extern DataLogger dataLogger;
 void Command::tick()
 {
-
+    if (xQueueReceive(handle_command_queue, (void *) &commandBuffer, 0))
+    {
+        String command((char *) commandBuffer);
+        // command handlers will change the response type if needed
+        responseType = 'R';
+        checkAndParseCommandLine(command);
+        responseBuff.stringPacket.packetType = responseType;
+        xQueueSend(handle_command_response_queue, &responseBuff, portMAX_DELAY);        
+    }
 }
 
 void Command::checkAndParseCommandLine(String commandLine)
 {
-    parser.processCommand(commandLine.c_str(), responseBuff);
-    Serial.println(responseBuff);
+    parser.processCommand(commandLine.c_str(), responseBuff.stringPacket.chars);
+    Serial.println(responseBuff.stringPacket.chars);
 }
 
 void Command::respondOK()
 {
-    strcpy(responseBuff, "OK");
+    strcpy(responseBuff.stringPacket.chars, "OK");
 }
 
 void Command::setFlow(FH_CommandParser::Argument *args, char *response)
@@ -29,7 +37,7 @@ void Command::setFlow(FH_CommandParser::Argument *args, char *response)
     uint64_t flow = args[1].asUInt64;
     char ch = channel.charAt(0);
     command.setFlow(ch, flow);
-    strcpy(response, responseBuff);
+    strcpy(response, responseBuff.stringPacket.chars);
 }
 
 
@@ -48,7 +56,7 @@ bool Command::setFlow(char ch, uint64_t flow)
             settings.flowAmSetPoint = flow;
             break;
         default:
-            sprintf(responseBuff, "No such channel as %c", ch);
+            sprintf(responseBuff.stringPacket.chars, "No such channel as %c", ch);
             retval = false;
             break;
     }
@@ -63,14 +71,14 @@ void Command::setSampleSet(FH_CommandParser::Argument *args, char *response)
 {
     uint64_t set = args[0].asUInt64;
     command.setSampleSet(set);
-    strcpy(response, responseBuff);
+    strcpy(response, responseBuff.stringPacket.chars);
 }
 
 bool Command::setSampleSet(uint set)
 {
     bool retval = false;
     if (set > 4)
-        strcpy(responseBuff, "set must be 0-4");
+        strcpy(responseBuff.stringPacket.chars, "set must be 0-4");
     else
     {
         if (set == 0)
@@ -79,7 +87,7 @@ bool Command::setSampleSet(uint set)
             selectorValves.closeGang(0);
             selectorValves.closeGang(1);
             selectorValves.closeGang(2);
-            strcpy(responseBuff, "All selector valves closed");
+            strcpy(responseBuff.stringPacket.chars, "All selector valves closed");
             retval = true;
         }
         else if (set == 4)
@@ -88,14 +96,14 @@ bool Command::setSampleSet(uint set)
             selectorValves.closeGang(0);
             selectorValves.closeGang(1);
             selectorValves.closeGang(2);
-            strcpy(responseBuff, "All selector valves closed, pump on");
+            strcpy(responseBuff.stringPacket.chars, "All selector valves closed, pump on");
             retval = true;
         }
         else
         {
             selectorValves.openSet(set-1);
             settings.samplePumpOn = true;
-            sprintf(responseBuff,"Opened sample set %u", set);
+            sprintf(responseBuff.stringPacket.chars,"Opened sample set %u", set);
             retval = true;
         }
         readings.sampleSet = set;
@@ -107,7 +115,7 @@ void Command::enableLogFile(FH_CommandParser::Argument *args, char *response)
 {
     uint64_t enable = args[0].asUInt64;
     command.enableLogFile((bool) enable);
-    strcpy(response, responseBuff);
+    strcpy(response, responseBuff.stringPacket.chars);
 }
 
 bool Command::enableLogFile(bool enable)
@@ -115,12 +123,12 @@ bool Command::enableLogFile(bool enable)
     if (enable)
     {
         dataLogger.beginLogging();
-        strcpy(responseBuff, "Logging on");
+        strcpy(responseBuff.stringPacket.chars, "Logging on");
     }
     else
     {
         dataLogger.stopLogging();
-        strcpy(responseBuff, "Logging off");
+        strcpy(responseBuff.stringPacket.chars, "Logging off");
     }
     return true;
 }
@@ -133,7 +141,7 @@ void Command::setPIDk(FH_CommandParser::Argument *args, char *response)
     double value = args[2].asDouble;
     command.setPIDk(pidS.charAt(0), constS.charAt(0), value);
     return;
-    strcpy(response, responseBuff);
+    strcpy(response, responseBuff.stringPacket.chars);
 }
 
 bool Command::setPIDk(char pid, char kConst, double value)
@@ -204,15 +212,15 @@ bool Command::setPIDk(char pid, char kConst, double value)
         default:
             badP = true;
     }
-    responseBuff[0] = 0;
+    responseBuff.stringPacket.chars[0] = 0;
     if (badP)
     {
-        sprintf(responseBuff,"PID should be g,o, or a, not %c", pid);
+        sprintf(responseBuff.stringPacket.chars,"PID should be g,o, or a, not %c", pid);
         retval = false;
     }
     else if (badK)
     {
-        sprintf(responseBuff,"K should be p,i, or d, not %c", kConst);
+        sprintf(responseBuff.stringPacket.chars,"K should be p,i, or d, not %c", kConst);
         retval = false;
     }
     else
@@ -227,7 +235,7 @@ void Command::saveSettings(FH_CommandParser::Argument *args, char *response)
 {
     uint64_t enable = args[0].asUInt64;
     command.saveSettings();
-    strcpy(response, responseBuff);
+    strcpy(response, responseBuff.stringPacket.chars);
 }
 
 bool Command::saveSettings()
@@ -235,9 +243,9 @@ bool Command::saveSettings()
     bool retval = dataLogger.saveSettings();
 
     if (retval)
-        strcpy(responseBuff,"Settings saved");
+        strcpy(responseBuff.stringPacket.chars,"Settings saved");
     else
-        strcpy(responseBuff,"Save to settings file FAILED");
+        strcpy(responseBuff.stringPacket.chars,"Save to settings file FAILED");
     
     return retval;
 
@@ -251,14 +259,14 @@ void Command::setPumpSpeed(FH_CommandParser::Argument *args, char *response)
     else
     {
         command.setPumpSpeed(value);
-        strcpy(response, responseBuff);
+        strcpy(response, responseBuff.stringPacket.chars);
     }
 }
 
 bool Command::setPumpSpeed(int64_t value)
 {
     settings.samplePumpSpeed = (uint) value;
-    sprintf(responseBuff,"pump speed set to %d %%", (int) value);
+    sprintf(responseBuff.stringPacket.chars,"pump speed set to %d %%", (int) value);
     return true;
 }
 
@@ -269,7 +277,7 @@ void Command::setFlowManual(FH_CommandParser::Argument *args, char *response)
     if (value > 4096)
         value = -1;
     command.setFlowManual(pidS.charAt(0), value);
-    strcpy(response, responseBuff);
+    strcpy(response, responseBuff.stringPacket.chars);
 }
 
 bool Command::setFlowManual(char pid, int64_t value)
@@ -291,15 +299,15 @@ bool Command::setFlowManual(char pid, int64_t value)
         default:
             badP = true;
     }
-    responseBuff[0] = 0;
+    responseBuff.stringPacket.chars[0] = 0;
     if (badP)
     {
-        sprintf(responseBuff,"valve should be g,o, or a, not %c", pid);
+        sprintf(responseBuff.stringPacket.chars,"valve should be g,o, or a, not %c", pid);
         retval = false;
     }
     else
     {
-        sprintf(responseBuff,"Valve %c manual set to %I64d.", pid, value);
+        sprintf(responseBuff.stringPacket.chars,"Valve %c manual set to %I64d.", pid, value);
         //sprintf(responseBuff,"PID %c K%c set", pid, kConst);
     }
     return retval;
@@ -315,23 +323,29 @@ void Command::zeroCO2(FH_CommandParser::Argument *args, char *response)
     command.zeroCO2();
 }
 
+void Command::sendDataPacketFormat(FH_CommandParser::Argument *args, char *response)
+{
+    command.sendDataPacketFormat();
+}
+
+void Command::sendDataPacketFormat()
+{
+    String format = dataLogger.getLogDataTypes();
+    strcpy(responseBuff.stringPacket.chars, format.c_str()); 
+    responseType= 'F';
+}
+
 void Command::init()
 {
-    if (!parser.registerCommand("sf","su", &setFlow))
-        printf("Could not register set flow command");
-    if (!parser.registerCommand("sm","si", &setFlowManual))
-        printf("Could not register set flow manual command");
-    if (!parser.registerCommand("ss","u", &setSampleSet))
-        printf("Could not register set sample command");
-    if (!parser.registerCommand("le","u", &enableLogFile))
-        printf("Could not register enable log file command");
-    if (!parser.registerCommand("pk","ssd", &setPIDk))
-        printf("Could not register set PID command");
-    if (!parser.registerCommand("set","", &saveSettings))
-        printf("Could not register save settings to file command");
-    if (!parser.registerCommand("ps","u", &setPumpSpeed))
-        printf("Could not register set pump speed command");
-    if (!parser.registerCommand("zco2","", &zeroCO2))
-        printf("CO2 zero cycle started");
+    parser.registerCommand("sf","su", &setFlow);
+    parser.registerCommand("sm","si", &setFlowManual);
+    parser.registerCommand("ss","u", &setSampleSet);
+    parser.registerCommand("le","u", &enableLogFile);
+    parser.registerCommand("pk","ssd", &setPIDk);
+    parser.registerCommand("set","", &saveSettings);
+    parser.registerCommand("ps","u", &setPumpSpeed);
+    parser.registerCommand("zco2","", &zeroCO2);
+    parser.registerCommand("df","", &sendDataPacketFormat);
 }
+
 
