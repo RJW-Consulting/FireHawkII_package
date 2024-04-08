@@ -41,6 +41,17 @@ void Radio::initHardware()
 
 void Radio::tick()
 {
+    if (radio_manager.available())
+    {
+        uint8_t len = sizeof(packetBuffer);
+        uint8_t from;
+        if (radio_manager.recvfromAck((uint8_t *) &packetBuffer, &len, &from))
+        {
+            //packetBuffer.StringPacket[len-1] = 0;
+            xQueueSend(handle_command_queue, &packetBuffer, portMAX_DELAY);
+        }
+    }
+
     if (xQueueReceive(handle_command_response_queue, (void *) &packetBuffer, 0))
     {
         Serial.println("sending command response");
@@ -65,16 +76,6 @@ void Radio::tick()
         {
             Serial.println("Send Failed");
             settings.baseStationAnswering = false;      
-        }
-    }
-    if (radio_manager.available())
-    {
-        uint8_t len = sizeof(packetBuffer);
-        uint8_t from;
-        if (radio_manager.recvfromAck((uint8_t *) &packetBuffer, &len, &from))
-        {
-            //packetBuffer.StringPacket[len-1] = 0;
-            xQueueSend(handle_command_queue, &packetBuffer, portMAX_DELAY);
         }
     }
 

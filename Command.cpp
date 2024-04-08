@@ -335,6 +335,104 @@ void Command::sendDataPacketFormat()
     responseType= 'F';
 }
 
+
+bool  Command::setTime(String& datetime) {
+    // Check if the string length is valid
+    if (datetime.length() != 14 && datetime.length() != 16 && datetime.length() != 17) {
+        return false;
+    }
+
+    // Check if all characters are digits
+    for (char c : datetime) {
+        if (!isdigit(c)) {
+            return false;
+        }
+    }
+
+    // Extract year, month, day, hour, minute, and second from the string
+    int year, month, day, hour, minute, second;
+    if (datetime.length() == 14) {
+        year = datetime.substring(0, 4).toInt();
+        month = datetime.substring(4, 6).toInt();
+        day = datetime.substring(6, 8).toInt();
+        hour = datetime.substring(8, 10).toInt();
+        minute = datetime.substring(10, 12).toInt();
+        second = datetime.substring(12).toInt();
+    } else if (datetime.length() == 16) {
+        // MM/DD/YYYY hh:mm:ss or YYYY/MM/DD hh:mm:ss format
+        if (datetime.charAt(2) == '/' && datetime.charAt(5) == '/') {
+            month = datetime.substring(0, 2).toInt();
+            day = datetime.substring(3, 5).toInt();
+            year = datetime.substring(6, 10).toInt();
+            hour = datetime.substring(11, 13).toInt();
+            minute = datetime.substring(14, 16).toInt();
+            second = datetime.substring(17).toInt();
+        } else if (datetime.charAt(4) == '/' && datetime.charAt(7) == '/') {
+            year = datetime.substring(0, 4).toInt();
+            month = datetime.substring(5, 7).toInt();
+            day = datetime.substring(8, 10).toInt();
+            hour = datetime.substring(11, 13).toInt();
+            minute = datetime.substring(14, 16).toInt();
+            second = datetime.substring(17).toInt();
+        } else {
+            return false; // Invalid format
+        }
+    } else if (datetime.length() == 17) {
+        // YYYYMMDD hhmmss format
+        year = datetime.substring(0, 4).toInt();
+        month = datetime.substring(4, 6).toInt();
+        day = datetime.substring(6, 8).toInt();
+        hour = datetime.substring(9, 11).toInt();
+        minute = datetime.substring(11, 13).toInt();
+        second = datetime.substring(13, 15).toInt();
+    }
+
+    // Check if year, month, day, hour, minute, and second are within valid ranges
+    if (year < 1900 || year > 9999 ||
+        month < 1 || month > 12 ||
+        day < 1 || day > 31 ||
+        hour < 0 || hour > 23 ||
+        minute < 0 || minute > 59 ||
+        second < 0 || second > 59) {
+        return false;
+    }
+
+    // Check for valid days in a month
+    if (day > 30 && (month == 4 || month == 6 || month == 9 || month == 11)) {
+        return false;
+    }
+    if (day > 28 && month == 2 && (year % 4 != 0 || (year % 100 == 0 && year % 400 != 0))) {
+        return false;
+    }
+    if (day > 29 && month == 2) {
+        return false;
+    }
+    DateTime dt(year, month, day, hour, minute, second);
+    rtc.stop();
+    rtc.adjust(dt);
+    rtc.start();
+
+
+    return true;
+}
+
+
+void Command::setTime(FH_CommandParser::Argument *args, char *response)
+{
+    bool formatGood = false;
+
+    String dateTimeString = args[0].asString;
+    formatGood = command.setTime(dateTimeString);
+    if (formatGood)
+    {
+        sprintf(responseBuff.stringPacket.chars,"Date and time set.");
+    }
+    else
+    {
+        sprintf(responseBuff.stringPacket.chars,"Invaled datetime.  Use YYYYMMDDhhmmss, MM/DD/YYYY hh:mm:ss, or YYYY/MM/DD hh:mm:ss.");
+    }
+}
+
 void Command::init()
 {
     parser.registerCommand("sf","su", &setFlow);
@@ -346,6 +444,7 @@ void Command::init()
     parser.registerCommand("ps","u", &setPumpSpeed);
     parser.registerCommand("zco2","", &zeroCO2);
     parser.registerCommand("df","", &sendDataPacketFormat);
+    parser.registerCommand("st","s", &setTime);
 }
 
 

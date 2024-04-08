@@ -199,6 +199,7 @@ bool initialized = false;
 
 static void task_driver_tick(void *pvParameters)
 {
+
   Serial.println("driver heartbeat started");
   while(1)
   {

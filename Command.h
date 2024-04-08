@@ -9,6 +9,7 @@
 #include "Driver_selectorValves.h"
 #include "Driver_ProportionalValve.h"
 #include "Driver_ppsystemsCO2.h"
+#include <RTClib.h>
 
 #define CP_COMMANDS 16
 #define CP_COMMAND_ARGS 4
@@ -29,6 +30,8 @@ extern Driver_ppsystemsCO2 co2;
 
 extern DataLogger dataLogger;
 
+extern RTC_PCF8523 rtc;
+
 #define COMMAND_RESPONSE_MAX_SIZE 128 
 
 
@@ -48,6 +51,7 @@ class Command
         bool setPumpSpeed(int64_t value);
         void zeroCO2();
         void sendDataPacketFormat();
+        bool setTime(String& datetime);
     private:
         FH_CommandParser parser;
         void respondOK();
@@ -61,6 +65,7 @@ class Command
         static void setPumpSpeed(FH_CommandParser::Argument *args, char *response);
         static void zeroCO2(FH_CommandParser::Argument *args, char *response);
         static void sendDataPacketFormat(FH_CommandParser::Argument *args, char *response);
+        static void setTime(FH_CommandParser::Argument *args, char *response);
         RadioPacket packet;
         uint8_t commandBuffer[RADIO_COMMAND_QUEUE_RECORD_SIZE];
 };
