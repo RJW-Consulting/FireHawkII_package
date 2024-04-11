@@ -114,8 +114,7 @@ extern QueueHandle_t handle_data_queue;
 #define MAXFLOW_AM  6000
 
 // Required for Serial on Zero based boards
-#define Serial SERIAL_PORT_USBVIRTUAL
-
+//#define Serial SERIAL_PORT_USBVIRTUAL
 
 
 #endif
