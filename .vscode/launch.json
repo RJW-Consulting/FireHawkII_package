@@ -7,7 +7,7 @@
             "cwd": "${workspaceFolder}",
             "executable": "..//.build//FireHawk_II_devel.ino.elf",
             "request": "launch",
-            "device": "ATSAMD21G18",
+            "device": "ATSAMD51J19",
             "servertype": "jlink",
             "armToolchainPath": "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\10 2021.10\\bin\\"
             

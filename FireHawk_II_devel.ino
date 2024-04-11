@@ -20,6 +20,8 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include <Adafruit_INA219.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_ADS1X15.h>
+#include <Adafruit_MS8607.h>
+#include <Adafruit_Sensor.h>
 #include <rp2040_pio.h>
 #include <TCA9548A-SOLDERED.h>
 #include <Adafruit_I2CDevice.h>
@@ -103,16 +105,17 @@ uint32_t msClock = 0;
 
 // Devices available globally
 RTC_PCF8523 rtc;
+Adafruit_MS8607 gasPTRH;  // Pressure/Temp/RH sensor in CO sensor hood
 Adafruit_INA219 ina219;
 Adafruit_MCP4728 mcp;
 Adafruit_ADS1115 ads1115_a;
 Adafruit_ADS1115 ads1115_b;
+TCA9548A i2cMux;
 int flowAOPin = A0;                               
 
 Driver_ppsystemsCO2 co2;
 Driver_selectorValves selectorValves;
 Driver_StatusLED led;
-TCA9548A i2cMux;
 PressureSensor p1(&i2cMux, PSENSOR1_MUX_CHANNEL, &readings.pressure1);
 PressureSensor p2(&i2cMux, PSENSOR2_MUX_CHANNEL, &readings.pressure2);
 
@@ -369,6 +372,7 @@ void i2cAddrTest() {
 void setup() 
 {
   // initialize serial communication at 115200 bits per second:
+  
   Serial.begin(115200);
   delay(1000); // prevents usb driver crash on startup, do not omit this
   while (!Serial) 
@@ -377,6 +381,7 @@ void setup()
       delay(1);
   }
   Serial.println("USB Serial Initialized");
+  
   // Disable the radio so it does not hold onto the MISO pin
   // and get in the way of the SD card
   // (temporary measure until radio used)

@@ -1,10 +1,5 @@
 #include "Radio.h"
 
-#define RFM95_CS    8
-#define RFM95_INT   3
-#define RFM95_RST   4
-
-#define RF95_FREQ 915.0
 
 // Singleton instance of the radio driver
 RH_RF95 radio_driver_rf95(RFM95_CS, RFM95_INT);

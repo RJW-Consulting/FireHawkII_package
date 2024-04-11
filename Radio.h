@@ -20,8 +20,18 @@ class Radio
 };
 
 // pin assignments for LoRa 
+/*  defines for Feather M0 with onblard LoRa
 #define RFM95_CS    8
 #define RFM95_INT   3
 #define RFM95_RST   4
+*/
+
+// defines for M4 Express with radio Featherwing
+#define RFM95_CS    9
+#define RFM95_INT   11
+#define RFM95_RST   6
+
+
+#define RF95_FREQ 915.0
 
 #endif
