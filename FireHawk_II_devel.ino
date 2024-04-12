@@ -229,7 +229,7 @@ static void task_driver_tick(void *pvParameters)
     {
       now = rtc.now();
       co2.tick();
-      //selectorValves.tick();
+      selectorValves.tick();
       dataLogger.tick();
       pump.tick();
       gasValve.tick();
