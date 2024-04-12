@@ -1,9 +1,28 @@
+#include <FreeRTOS.h>
+#include <croutine.h>
+#include <deprecated_definitions.h>
+#include <error_hooks.h>
+#include <event_groups.h>
+#include <FreeRTOS_SAMD51.h>
+#include <FreeRTOSConfig.h>
+#include <message_buffer.h>
+#include <mpu_prototypes.h>
+#include <mpu_wrappers.h>
+#include <portable.h>
+#include <portmacro.h>
+#include <projdefs.h>
+#include <queue.h>
+#include <runTimeStats_hooks.h>
+#include <semphr.h>
+#include <stack_macros.h>
+#include <stream_buffer.h>
+#include <task.h>
+#include <timers.h>
+#include <list.h>
 
 
 
-#include "FreeRTOS_SAMD21.h"
-#include "semphr.h"
-#include <Adafruit_MCP4728.h>
+
 /*
 LoadFile ../.build/FireHawk_II_devel.ino.elf
 */
@@ -17,6 +36,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 
 #include <Wire.h>
 #include <arduino.h>
+#include <Adafruit_MCP4728.h>
 #include <Adafruit_INA219.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_ADS1X15.h>
@@ -45,7 +65,6 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 //**************************************************************************
 
 #define  ERROR_LED_PIN  13 //Led Pin: Typical Arduino Board
-//#define  ERROR_LED_PIN  2 //Led Pin: samd21 xplained board
 
 #define ERROR_LED_LIGHTUP_STATE  HIGH // the state that makes the led light up on your board, either low or high
 
@@ -210,7 +229,7 @@ static void task_driver_tick(void *pvParameters)
     {
       now = rtc.now();
       co2.tick();
-      selectorValves.tick();
+      //selectorValves.tick();
       dataLogger.tick();
       pump.tick();
       gasValve.tick();
@@ -313,7 +332,6 @@ SemaphoreHandle_t  i2cMutex;
 
 void initDrivers()
 {
-  bool initialized = false;
   initRTC();
   i2cMux.begin();
   i2cMux.closeAll();
@@ -337,6 +355,7 @@ void initDrivers()
   led.init(STATUS_LED_PIN);  
   p1.init();
   p2.init();
+  initialized = true;
 }
 
 void initGlobals()
@@ -372,16 +391,22 @@ void i2cAddrTest() {
 void setup() 
 {
   // initialize serial communication at 115200 bits per second:
-  
+
   Serial.begin(115200);
   delay(1000); // prevents usb driver crash on startup, do not omit this
+  /*
   while (!Serial) 
   {
       // will pause Zero, Leonardo, etc until serial console opens
       delay(1);
   }
-  Serial.println("USB Serial Initialized");
-  
+  */
+
+  for (int i = 0; i < 10; i++)
+  {
+    Serial.println("USB Serial Initialized");
+    delay(1000);
+  }
   // Disable the radio so it does not hold onto the MISO pin
   // and get in the way of the SD card
   // (temporary measure until radio used)

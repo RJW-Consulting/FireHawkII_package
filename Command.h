@@ -2,7 +2,7 @@
 #define Command_h
 
 #include <arduino.h>
-#include "FreeRTOS_SAMD21.h"
+#include "FreeRTOS.h"
 #include "globals.h"
 #include "CommandParser.h"
 #include "DataLogger.h"

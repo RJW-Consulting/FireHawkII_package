@@ -2,7 +2,7 @@
 #define globals_h
 
 #include "RTClib.h"
-#include "FreeRTOS_SAMD21.h"
+#include "FreeRTOS.h"
 #include <semphr.h>
 
 #define NUM_VALVE_GANGS 3

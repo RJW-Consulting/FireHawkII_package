@@ -7,7 +7,7 @@
 #include <SD.h>
 #include "minIni.h"
 #include "RTClib.h"
-#include "FreeRTOS_SAMD21.h"
+#include "FreeRTOS.h"
 #include "Driver_ppsystemsCO2.h"
 #include "Driver_ProportionalValve.h"
 
