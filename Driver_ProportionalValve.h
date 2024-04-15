@@ -11,6 +11,7 @@
 #include <TCA9548A-SOLDERED.h>
 #include <PID_v1.h>
 #include "globals.h"
+#include "AveragedReadings.h"
 
 #define FLOW_BUFFER_SIZE 4
 
@@ -58,11 +59,7 @@ class Driver_ProportionalValve
         Adafruit_MCP4728 *mcp;
         TCA9548A *i2cMux;
         PID *pid;
-        int flowBuffer[FLOW_BUFFER_SIZE];
-        uint_fast8_t bufferHead;
-        uint_fast8_t bufferTail;
-        uint_fast8_t bufferSize;
-        uint64_t bufferSum;
+        AveragedReadings flowBuffer;
         uint_fast8_t muxChannel;
         uint_fast8_t flowI2CAddr;
         Adafruit_ADS1115 *flowADC;

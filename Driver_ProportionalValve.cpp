@@ -54,42 +54,17 @@ void Driver_ProportionalValve::updateKs()
 
 void Driver_ProportionalValve::initFlowBuffer()
 {
-  bufferHead = 0;
-  bufferTail = 0;
-  bufferSize = 0;
-  bufferSum = 0;
-  for (uint i = 0; i < FLOW_BUFFER_SIZE; i++)
-  {
-    flowBuffer[i] = 0;
-  }  
+  flowBuffer.initReadingBuffer(FLOW_BUFFER_SIZE);
 }
 
 void Driver_ProportionalValve::addFlowPoint(int flow)
 {
- #if FLOW_BUFFER_SIZE > 0 
-    if (bufferSize == FLOW_BUFFER_SIZE) 
-    {
-        // Remove the oldest data point if the buffer is full
-        bufferSum -= flowBuffer[bufferHead];
-        bufferHead = (bufferHead + 1) % FLOW_BUFFER_SIZE;
-    }
-
-    flowBuffer[bufferTail] = flow;
-    bufferTail = (bufferTail + 1) % FLOW_BUFFER_SIZE;
-    bufferSize++;
-    if (bufferSize > FLOW_BUFFER_SIZE)
-      bufferSize = FLOW_BUFFER_SIZE;
-    bufferSum += flow;
-  #endif
+  flowBuffer.addReading((float)flow);
 }
 
 int Driver_ProportionalValve::getMeanFlow()
 {
-    if (bufferSize == 0) {
-      return 0; // Avoid division by zero when the buffer is empty
-    }
-    return (int)(bufferSum / bufferSize);
-
+  return (int) flowBuffer.getMeanReading();
 }
 
 /* code for Honeywell flow sensor with analog output */
