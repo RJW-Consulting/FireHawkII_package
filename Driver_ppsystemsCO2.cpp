@@ -100,7 +100,7 @@ bool Driver_ppsystemsCO2::receivedMeasurement()
         this->lastMessageTime = *(this->nowPtr);
         this->lastReadingTime = *(this->nowPtr);
         this->co2message = "";
-        readings.coConc = lastCO2Reading;
+        readings.co2Conc = lastCO2Reading;
         ret = true;
       }
     }

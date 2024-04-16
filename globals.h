@@ -21,8 +21,10 @@ struct Readings {
     float co2MassGas;
     float co2MassOa;
     float co2MassAm;
-    float coConc;
-    float coMv;
+    float coConc1;
+    float coConc2;
+    float coV1;
+    float coV2;
     float pressure;
     float rh;
     float airTemp;
@@ -60,10 +62,10 @@ struct Settings {
     double amPIDKp;    
     double amPIDKi;
     double amPIDKd;
-    float coCalLowConc;
-    float coCalLowMV;
-    float coCalHighConc;
-    float coCalHighMV; 
+    float coSlope1;
+    float coIntercept1;
+    float coSlope2;
+    float coIntercept2; 
 };
 
 struct DataPacket{
@@ -80,8 +82,10 @@ struct DataPacket{
     float co2MassGas;
     float co2MassOa;
     float co2MassAm;
-    float coMv;
-    float coConc;
+    float coV1;
+    float coConc1;
+    float coV2;
+    float coConc2;
     float pressure;
     float rh;
     float airTemp;

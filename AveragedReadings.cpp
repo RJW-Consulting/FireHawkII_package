@@ -40,7 +40,7 @@ float AveragedReadings::getMeanReading()
     if (bufferSize == 0) {
       return 0; // Avoid division by zero when the buffer is empty
     }
-    return (int)(bufferSum / bufferSize);
+    return (float)(bufferSum / bufferSize);
 
 }
 

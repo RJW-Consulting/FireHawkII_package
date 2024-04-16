@@ -433,6 +433,32 @@ void Command::setTime(FH_CommandParser::Argument *args, char *response)
     }
 }
 
+void Command::zeroCO()
+{
+    co_1.zero();
+    co_2.zero();
+}
+
+void Command::zeroCO(FH_CommandParser::Argument *args, char *response)
+{
+    command.zeroCO();
+    sprintf(responseBuff.stringPacket.chars,"CO zero intercept set.");
+
+}
+
+void Command::spanCO(float spanPPM)
+{
+    co_1.span(spanPPM);
+    co_2.span(spanPPM);
+}
+
+void Command::spanCO(FH_CommandParser::Argument *args, char *response)
+{
+    float span = (float) args[0].asDouble;
+    command.spanCO(span);
+    sprintf(responseBuff.stringPacket.chars,"CO slope set.");
+}
+
 void Command::init()
 {
     parser.registerCommand("sf","su", &setFlow);
@@ -442,7 +468,9 @@ void Command::init()
     parser.registerCommand("pk","ssd", &setPIDk);
     parser.registerCommand("set","", &saveSettings);
     parser.registerCommand("ps","u", &setPumpSpeed);
-    parser.registerCommand("zco2","", &zeroCO2);
+    parser.registerCommand("co2z","", &zeroCO2);
+    parser.registerCommand("coz","", &zeroCO);
+    parser.registerCommand("cos","d", &spanCO);
     parser.registerCommand("df","", &sendDataPacketFormat);
     parser.registerCommand("st","s", &setTime);
 }

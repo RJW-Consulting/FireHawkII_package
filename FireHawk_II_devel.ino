@@ -47,6 +47,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include <Adafruit_I2CDevice.h>
 #include "RTClib.h"
 #include "Driver_ppsystemsCO2.h"
+#include "Driver_CO.h"
 #include "Driver_selectorValves.h"
 #include "Driver_StatusLED.h"
 #include "Driver_ProportionalValve.h"
@@ -115,7 +116,8 @@ void myDelayMsUntil(TickType_t *previousWakeTime, int ms)
 #define am_FLOW_ADC_CHANNEL 0x2
 #define PSENSOR1_MUX_CHANNEL 0x04
 #define PSENSOR2_MUX_CHANNEL 0x05
-
+#define CO_1_ADC_CHANNEL 0
+#define CO_2_ADC_CHANNEL 2
 // Global variables
 struct Readings readings;
 struct Settings settings;
@@ -133,6 +135,8 @@ TCA9548A i2cMux;
 int flowAOPin = A0;                               
 
 Driver_ppsystemsCO2 co2;
+Driver_CO co_1;
+Driver_CO co_2;
 Driver_selectorValves selectorValves;
 Driver_StatusLED led;
 PressureSensor p1(&i2cMux, PSENSOR1_MUX_CHANNEL, &readings.pressure1);
@@ -197,6 +201,7 @@ Driver_Pump pump(
                   &settings.samplePumpOn,
                   &settings.samplePumpSpeed);
 
+
 // Major system components available globally
 DataLogger dataLogger;
 Command command;
@@ -229,6 +234,8 @@ static void task_driver_tick(void *pvParameters)
     {
       now = rtc.now();
       co2.tick();
+      co_1.tick();
+      co_2.tick();
       selectorValves.tick();
       dataLogger.tick();
       pump.tick();
@@ -352,6 +359,8 @@ void initDrivers()
   amValve.init();
   now = rtc.now();
   co2.open(19200, &now, 1);
+  co_1.init(&now, &readings.coConc1, &readings.coV1, &settings.coSlope1, &settings.coIntercept1, &ads1115_a,  CO_1_ADC_CHANNEL);
+  co_2.init(&now, &readings.coConc2, &readings.coV2, &settings.coSlope2, &settings.coIntercept2, &ads1115_a,  CO_2_ADC_CHANNEL);
   led.init(STATUS_LED_PIN);  
   p1.init();
   p2.init();
@@ -402,11 +411,7 @@ void setup()
   }
   */
 
-  for (int i = 0; i < 10; i++)
-  {
-    Serial.println("USB Serial Initialized");
-    delay(1000);
-  }
+  Serial.println("USB Serial Initialized");
   // Disable the radio so it does not hold onto the MISO pin
   // and get in the way of the SD card
   // (temporary measure until radio used)
@@ -438,7 +443,7 @@ void setup()
   // Sets the stack size and priority of each task
   // Also initializes a handler pointer to each task, which are important to communicate with and retrieve info from tasks
   xTaskCreate(task_ms_clock,     "msClock",       128, NULL, tskIDLE_PRIORITY + 3, &handle_clock_task);
-  xTaskCreate(task_driver_tick,     "drvrTick",       256, NULL, tskIDLE_PRIORITY + 2, &handle_driver_tick_task);
+  xTaskCreate(task_driver_tick,     "drvrTick",       512, NULL, tskIDLE_PRIORITY + 2, &handle_driver_tick_task);
   xTaskCreate(task_test_drivers, "test", 256, NULL, tskIDLE_PRIORITY + 1, &handle_test_task);
 
   // Start the RTOS, this function will never return and will schedule the tasks.

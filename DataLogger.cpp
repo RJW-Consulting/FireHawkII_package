@@ -52,7 +52,10 @@ void DataLogger::loadSettings()
     settings.amPIDKp = ini.getf(section, "amPIDKp", 0.01);    
     settings.amPIDKi = ini.getf(section, "amPIDKi", 0.5);
     settings.amPIDKd = ini.getf(section, "amPIDKd", 0.01);
-
+    settings.coSlope1 = ini.getf(section, "coSlope1", 1.0);
+    settings.coIntercept1 = ini.getf(section, "coIntercept1", 0);
+    settings.coSlope2 = ini.getf(section, "coSlope2", 1.0);
+    settings.coIntercept2 = ini.getf(section, "coIntercept2", 0);
     if (wasLogging)
     {
         beginLogging();
@@ -84,6 +87,10 @@ bool DataLogger::saveSettings()
     success &= ini.put(section, "amPIDKp", (INI_REAL) settings.amPIDKp);    
     success &= ini.put(section, "amPIDKi", (INI_REAL) settings.amPIDKi);
     success &= ini.put(section, "amPIDKd", (INI_REAL) settings.amPIDKd);
+    success &= ini.put(section, "coSlope1", (INI_REAL) settings.coSlope1);
+    success &= ini.put(section, "coIntercept1", (INI_REAL) settings.coIntercept1);
+    success &= ini.put(section, "coSlope2", (INI_REAL) settings.coSlope2);
+    success &= ini.put(section, "coIntercept2", (INI_REAL) settings.coIntercept2);
 
     if (wasLogging)
     {
@@ -194,8 +201,10 @@ String DataLogger::getLogStringHeader()
     header += "total_co2_gas,";
     header += "total_co2_oa,";
     header += "total_co2_am,";
-    header += "co_mv,";
-    header += "co_ppm,";
+    header += "co1_v,";
+    header += "co1_ppm,";
+    header += "co2_v,";
+    header += "co2_ppm,";
     header += "air_t,";
     header += "air_p,";
     header += "air_rh,";
@@ -222,7 +231,7 @@ String DataLogger::buildLogString()
     String co2Reading;
     if (settings.co2State == 'M')
     {
-        co2Reading = String(readings.coConc,2);
+        co2Reading = String(readings.co2Conc,2);
     }
     else
     {
@@ -261,9 +270,13 @@ String DataLogger::buildLogString()
     line += ",";
     line += String(readings.co2MassAm,2);
     line += ",";
-    line += String(readings.coMv);
+    line += String(readings.coV1);
     line += ",";
-    line += String(readings.coConc,2);
+    line += String(readings.coConc1,2);
+    line += ",";
+    line += String(readings.coV2);
+    line += ",";
+    line += String(readings.coConc2,2);
     line += ",";
     line += String(readings.airTemp,1);
     line += ",";
@@ -310,8 +323,10 @@ void DataLogger::fillDataPacket(struct DataPacket *packet)
     packet->co2MassGas = readings.co2MassGas;
     packet->co2MassOa = readings.co2MassOa;
     packet->co2MassAm = readings.co2MassAm;
-    packet->coMv = readings.coMv;
-    packet->coConc = readings.coConc;
+    packet->coV1 = readings.coV1;
+    packet->coConc1 = readings.coConc1;
+    packet->coV2 = readings.coV2;
+    packet->coConc2 = readings.coConc2;
     packet->pressure = readings.pressure;
     packet->rh = readings.rh;
     packet->airTemp = readings.airTemp;
@@ -334,7 +349,7 @@ String DataLogger::getLogDataTypes()
     f       float       4       4-byte floating point 
 
     */ 
-   String retString = "tuuuUUUcfffffffffffff";
+   String retString = "tuuuUUUcfffffffffffffff";
    return retString;
 }
 

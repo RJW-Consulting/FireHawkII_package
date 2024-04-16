@@ -9,6 +9,7 @@
 #include "Driver_selectorValves.h"
 #include "Driver_ProportionalValve.h"
 #include "Driver_ppsystemsCO2.h"
+#include "Driver_CO.h"
 #include <RTClib.h>
 
 #define CP_COMMANDS 16
@@ -27,6 +28,9 @@ extern Driver_ProportionalValve oaValve;
 extern Driver_ProportionalValve amValve;
 
 extern Driver_ppsystemsCO2 co2;
+
+extern Driver_CO co_1;
+extern Driver_CO co_2;
 
 extern DataLogger dataLogger;
 
@@ -52,6 +56,8 @@ class Command
         void zeroCO2();
         void sendDataPacketFormat();
         bool setTime(String& datetime);
+        void zeroCO();
+        void spanCO(float spanPPM);
     private:
         FH_CommandParser parser;
         void respondOK();
@@ -66,6 +72,8 @@ class Command
         static void zeroCO2(FH_CommandParser::Argument *args, char *response);
         static void sendDataPacketFormat(FH_CommandParser::Argument *args, char *response);
         static void setTime(FH_CommandParser::Argument *args, char *response);
+        static void zeroCO(FH_CommandParser::Argument *args, char *response);
+        static void spanCO(FH_CommandParser::Argument *args, char *response);
         RadioPacket packet;
         uint8_t commandBuffer[RADIO_COMMAND_QUEUE_RECORD_SIZE];
 };
