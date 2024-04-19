@@ -474,6 +474,25 @@ void Command::spanCO(FH_CommandParser::Argument *args, char *response)
     sprintf(responseBuff.stringPacket.chars,"CO slope set.");
 }
 
+void Command::co2Pump(bool enable)
+{
+    co2.setPump(enable);
+}
+
+void Command::co2Pump(FH_CommandParser::Argument *args, char *response)
+{
+    int64_t value = args[0].asInt64;
+    bool enable = false;
+    if (value != 0)
+        enable = true;
+    command.co2Pump(enable);
+    if (enable)
+        sprintf(responseBuff.stringPacket.chars,"CO2 pump ON.");
+    else
+        sprintf(responseBuff.stringPacket.chars,"CO2 pump OFF.");
+
+}
+
 void Command::init()
 {
     parser.registerCommand("sf","su", &setFlow);
@@ -489,6 +508,7 @@ void Command::init()
     parser.registerCommand("cos","d", &spanCO);
     parser.registerCommand("df","", &sendDataPacketFormat);
     parser.registerCommand("st","s", &setTime);
+    parser.registerCommand("co2p","u", &co2Pump);
 }
 
 

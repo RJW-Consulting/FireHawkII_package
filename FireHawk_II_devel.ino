@@ -53,6 +53,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include "Driver_ProportionalValve.h"
 #include "Driver_Pump.h"
 #include "Driver_mprls.h"
+#include "Driver_PTRH.h"
 #include "Control.h"
 #include "Command.h"
 #include "DataLogger.h"
@@ -127,7 +128,6 @@ uint32_t msClock = 0;
 // Devices available globally
 RTC_PCF8523 rtc;
 Adafruit_MS8607 gasPTRH;  // Pressure/Temp/RH sensor in CO sensor hood
-// TODO - Implement driver for PTRH sensor
 Adafruit_INA219 ina219;
 Adafruit_MCP4728 mcp;
 Adafruit_ADS1115 ads1115_a;
@@ -141,6 +141,7 @@ Driver_CO co_1;
 Driver_CO co_2;
 Driver_selectorValves selectorValves;
 Driver_StatusLED led;
+Driver_PTRH ptrh;
 PressureSensor p1(&i2cMux, PSENSOR1_MUX_CHANNEL, &readings.pressure1);
 PressureSensor p2(&i2cMux, PSENSOR2_MUX_CHANNEL, &readings.pressure2);
 
@@ -238,8 +239,8 @@ static void task_driver_tick(void *pvParameters)
       co2.tick();
       co_1.tick();
       co_2.tick();
+      ptrh.tick();
       selectorValves.tick();
-      dataLogger.tick();
       pump.tick();
       gasValve.tick();
       oaValve.tick();    
@@ -248,6 +249,7 @@ static void task_driver_tick(void *pvParameters)
       p1.tick();
       p2.tick();
       radio.tick();
+      dataLogger.tick();
       command.tick();
     }
     myDelayMs(INTERVAL_DRIVER_TICK);
@@ -363,6 +365,7 @@ void initDrivers()
   co2.open(19200, &now, 1);
   co_1.init(&now, &readings.coConc1, &readings.coV1, &settings.coSlope1, &settings.coIntercept1, &ads1115_a,  CO_1_ADC_CHANNEL);
   co_2.init(&now, &readings.coConc2, &readings.coV2, &settings.coSlope2, &settings.coIntercept2, &ads1115_a,  CO_2_ADC_CHANNEL);
+  ptrh.init(&now, &gasPTRH);
   led.init(STATUS_LED_PIN);  
   p1.init();
   p2.init();
