@@ -127,11 +127,13 @@ uint32_t msClock = 0;
 // Devices available globally
 RTC_PCF8523 rtc;
 Adafruit_MS8607 gasPTRH;  // Pressure/Temp/RH sensor in CO sensor hood
+// TODO - Implement driver for PTRH sensor
 Adafruit_INA219 ina219;
 Adafruit_MCP4728 mcp;
 Adafruit_ADS1115 ads1115_a;
 Adafruit_ADS1115 ads1115_b;
 TCA9548A i2cMux;
+
 int flowAOPin = A0;                               
 
 Driver_ppsystemsCO2 co2;

@@ -52,6 +52,7 @@ class Command
         bool setPIDk(char pid, char kConst, double value);
         bool setFlowManual(char pid, int64_t value);
         bool saveSettings();
+        void restoreSettings();
         bool setPumpSpeed(int64_t value);
         void zeroCO2();
         void sendDataPacketFormat();
@@ -68,12 +69,17 @@ class Command
         static void setPIDk(FH_CommandParser::Argument *args, char *response);
         static void setFlowManual(FH_CommandParser::Argument *args, char *response);
         static void saveSettings(FH_CommandParser::Argument *args, char *response);
+        static void restoreSettings(FH_CommandParser::Argument *args, char *response);
+        // TODO - implement command to set zero flow
+        // TODO - implement command to set flow scaling factor
         static void setPumpSpeed(FH_CommandParser::Argument *args, char *response);
         static void zeroCO2(FH_CommandParser::Argument *args, char *response);
         static void sendDataPacketFormat(FH_CommandParser::Argument *args, char *response);
         static void setTime(FH_CommandParser::Argument *args, char *response);
         static void zeroCO(FH_CommandParser::Argument *args, char *response);
         static void spanCO(FH_CommandParser::Argument *args, char *response);
+        // TODO - Implement command for CO2 span/scale
+        // TODO - Implement command for CO2 pump on/off 
         RadioPacket packet;
         uint8_t commandBuffer[RADIO_COMMAND_QUEUE_RECORD_SIZE];
 };

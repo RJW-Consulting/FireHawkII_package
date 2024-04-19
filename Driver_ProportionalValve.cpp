@@ -99,6 +99,7 @@ int Driver_ProportionalValve::getAnalogFlow()
 
 double Driver_ProportionalValve::calculateFlowRate(double voltage, const std::vector<FlowData>& flowTable) 
 {
+    // TODO - flow rate zero offset and scaling factor
     double retValue = -1;
     // Check if voltage is outside the range
     if (voltage < flowTable.front().voltage_vdc)

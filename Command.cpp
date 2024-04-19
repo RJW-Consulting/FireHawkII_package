@@ -251,6 +251,21 @@ bool Command::saveSettings()
 
 }
 
+void Command::restoreSettings(FH_CommandParser::Argument *args, char *response)
+{
+    uint64_t enable = args[0].asUInt64;
+    command.restoreSettings();
+    strcpy(response, responseBuff.stringPacket.chars);
+}
+
+void Command::restoreSettings()
+{
+    dataLogger.loadSettings();
+
+    strcpy(responseBuff.stringPacket.chars,"Settings restored from settings file.");
+}
+
+
 void Command::setPumpSpeed(FH_CommandParser::Argument *args, char *response)
 {
     int64_t value = args[0].asInt64;
@@ -467,6 +482,7 @@ void Command::init()
     parser.registerCommand("le","u", &enableLogFile);
     parser.registerCommand("pk","ssd", &setPIDk);
     parser.registerCommand("set","", &saveSettings);
+    parser.registerCommand("rst","", &restoreSettings);
     parser.registerCommand("ps","u", &setPumpSpeed);
     parser.registerCommand("co2z","", &zeroCO2);
     parser.registerCommand("coz","", &zeroCO);

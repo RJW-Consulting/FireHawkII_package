@@ -30,6 +30,7 @@ char section[] = "settings";
 
 void DataLogger::loadSettings()
 {
+    // TODO - implement settings for flow zero and scaling factors
     bool wasLogging = false;
     if (logFileName != "")
     {

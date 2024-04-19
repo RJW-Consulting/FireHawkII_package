@@ -15,6 +15,7 @@
 
 class Driver_StatusLED
 {
+    // TODO - Flesh out status LED
     public:
         void init(int16_t pin);
         void tick();

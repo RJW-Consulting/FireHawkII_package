@@ -12,6 +12,7 @@ class Driver_ppsystemsCO2
     void tick();
     char getState();
     void startZero();
+    // TODO - Implement CO2 Span/scale method
     int getZeroSec();
     int getZeroEndSec();
     float getMeasurement(DateTime &measurementTime);
