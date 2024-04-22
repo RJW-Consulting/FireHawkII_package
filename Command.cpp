@@ -77,6 +77,8 @@ void Command::setSampleSet(FH_CommandParser::Argument *args, char *response)
 bool Command::setSampleSet(uint set)
 {
     bool retval = false;
+    if (readings.sampleSet != set)
+        co2.resetAccumulators();
     if (set > 4)
         strcpy(responseBuff.stringPacket.chars, "set must be 0-4");
     else

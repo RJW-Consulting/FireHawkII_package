@@ -22,6 +22,7 @@ void Driver_ppsystemsCO2::open(int baud, DateTime *now, uint8_t interval)
   this->nowPtr = now;
   this->lastReadingTime = *(this->nowPtr);
   this->lastMessageTime = *(this->nowPtr);
+  this->lastAccumulationTime = *(this->nowPtr);
   this->measInterval = interval;
   this->state = CO2_STATE_UNKNOWN;
   Serial.println("CO2 Driver Initialized");
@@ -63,6 +64,11 @@ void Driver_ppsystemsCO2::tick()
       }
     }
     readings.measurementTime = *(this->nowPtr);
+    if (*(this->nowPtr) > lastAccumulationTime)
+    {
+      updateAccumulators();
+      lastAccumulationTime = *nowPtr;
+    }
     readings.co2Conc = lastCO2Reading;
     settings.co2State = state;
   }
@@ -240,6 +246,59 @@ float Driver_ppsystemsCO2::getMeasurement(DateTime &measurementTime)
 {
   measurementTime = this->lastReadingTime;
   return this->lastCO2Reading;
+}
+
+float Driver_ppsystemsCO2::calculateCO2Mass(float CO2_concentration_PPM, float flow_SCCM, float time_seconds, float temperature_Celsius, float pressure_millibars) {
+    // Constants
+    const float R = 8.314; // Ideal gas constant in J/(mol*K)
+    const float M_CO2 = 44.01; // Molar mass of CO2 in g/mol
+
+    // Convert temperature from Celsius to Kelvin
+    float temperature_K = temperature_Celsius + 273.15;
+
+    // Convert pressure from millibars to Pascals
+    float pressure_Pa = pressure_millibars * 100;
+
+    // Convert flow from SCCM to m^3/s
+    float flow_m3s = flow_SCCM * 1e-6 / 60; // 1 SCCM = 1e-6 m^3/s
+
+    // Convert CO2 concentration from PPM to fraction
+    float CO2_concentration_fraction = CO2_concentration_PPM * 1e-6;
+
+    // Calculate volume of CO2 collected using flow and time
+    float volume_collected = flow_m3s * time_seconds;
+
+    // Calculate moles of CO2 collected using ideal gas law
+    float n_CO2 = (pressure_Pa * volume_collected) / (R * temperature_K);
+
+    // Calculate mass of CO2 collected
+    float mass_CO2 = n_CO2 * M_CO2;
+
+    // return milligrams
+    return mass_CO2 * 1000;
+}
+
+void Driver_ppsystemsCO2::updateAccumulators()
+{
+  // get seconds since last reading
+  // this must be called before lastMessageTime is updated
+  if (readings.sampleSet > 0)
+  {
+    float seconds = (float) (this->nowPtr->unixtime() - lastAccumulationTime.unixtime());
+    readings.co2MassGas += calculateCO2Mass(readings.co2Conc, readings.flowGas, seconds, readings.airTemp, readings.pressure);
+    readings.co2MassOa += calculateCO2Mass(readings.co2Conc, readings.flowOa, seconds, readings.airTemp, readings.pressure);
+    readings.co2MassAm += calculateCO2Mass(readings.co2Conc, readings.flowAm, seconds, readings.airTemp, readings.pressure);
+
+  }
+
+}
+
+void Driver_ppsystemsCO2::resetAccumulators()
+{
+  readings.co2MassGas = 0;
+  readings.co2MassOa = 0;
+  readings.co2MassAm = 0;
+  lastAccumulationTime = *nowPtr;
 }
 
 void Driver_ppsystemsCO2::setPump(bool state)

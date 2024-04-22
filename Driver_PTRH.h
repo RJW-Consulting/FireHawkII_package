@@ -6,7 +6,7 @@
 #include "RTClib.h"
 #include "globals.h"
 
-// TODO - Replace sensor and check RH reading
+// TODO - Replace PTRH sensor and check RH reading
 
 class Driver_PTRH
 {

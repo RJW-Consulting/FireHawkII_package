@@ -349,10 +349,10 @@ void initDrivers()
   selectorValves.init();
   selectorValves.setMSClock(&msClock);
   mcp.begin();
-  mcp.setChannelValue(gas_VALVE_CHANNEL,0);
-  mcp.setChannelValue(oa_VALVE_CHANNEL,0);
-  mcp.setChannelValue(am_VALVE_CHANNEL,0);
-  mcp.setChannelValue(PUMP_CHANNEL,0);
+  mcp.setChannelValue(gas_VALVE_CHANNEL, 0);
+  mcp.setChannelValue(oa_VALVE_CHANNEL, 0);
+  mcp.setChannelValue(am_VALVE_CHANNEL, 0);
+  mcp.setChannelValue(PUMP_CHANNEL, 0);
   initialized = ads1115_a.begin(GAS_SENSOR_ADC_I2C);
   ads1115_a.setGain(GAIN_TWOTHIRDS);
   initialized = ads1115_b.begin(FLOW_ADC_I2C);

@@ -23,12 +23,15 @@ class Driver_ppsystemsCO2
     bool receiveAvailable();
     void setPump(bool state);
     bool getPumpState();
+    void updateAccumulators();
+    void resetAccumulators();
   
   private:
     DateTime *nowPtr;
     DateTime lastReadingTime;
     DateTime lastZeroTime;
     DateTime lastMessageTime;
+    DateTime lastAccumulationTime;
     float lastCO2Reading;
     float lastIRGATemperature;
     int zeroCount;
@@ -43,6 +46,8 @@ class Driver_ppsystemsCO2
     bool receivedWait();
     bool receivedZero();
     bool parseMeasurement(String instr);
+    float calculateCO2Mass(float CO2_concentration_PPM, float flow_SCCM, float time_seconds, float temperature_Celsius, float pressure_millibars);
+
 
 };
 
