@@ -303,7 +303,6 @@ void Driver_ppsystemsCO2::resetAccumulators()
 
 void Driver_ppsystemsCO2::setPump(bool state)
 {
-  // TODO - CO2 pump on/off does not work consistantly
   if (state)
   {
     send("P1\n");

@@ -227,6 +227,13 @@ static void task_ms_clock(void *pvParameters)
 
 bool initialized = false;
 
+void batteryVoltage()
+{
+  int16_t battOneThirdV;
+  battOneThirdV = ads1115_b.readADC_SingleEnded(3);
+  readings.batteryV = ((float) battOneThirdV) * ADC_VOLT_CONVERSION * 3;
+}
+
 static void task_driver_tick(void *pvParameters)
 {
 
@@ -251,6 +258,7 @@ static void task_driver_tick(void *pvParameters)
       radio.tick();
       dataLogger.tick();
       command.tick();
+      batteryVoltage();
     }
     myDelayMs(INTERVAL_DRIVER_TICK);
   }
