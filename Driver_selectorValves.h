@@ -6,7 +6,7 @@
 #include "globals.h"
 
 //#define PCA9685_BASE_I2C_ADDR 0x40
-#define PCA9685_BASE_I2C_ADDR 0x40
+#define PCA9685_BASE_I2C_ADDR 0x41
 
 struct SelValveState {
     PCA9685::Percent state;
