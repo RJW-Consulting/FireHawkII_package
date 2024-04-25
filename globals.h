@@ -65,7 +65,13 @@ struct Settings {
     float coSlope1;
     float coIntercept1;
     float coSlope2;
-    float coIntercept2; 
+    float coIntercept2;
+    float gasFlowIntercept;
+    float gasFlowSlope;
+    float oaFlowIntercept;
+    float oaFlowSlope;
+    float amFlowIntercept;
+    float amFlowSlope;
 };
 
 struct DataPacket{

@@ -17,7 +17,7 @@
 
 
 
-// TODO - Revamp Control into automation
+// TODO - OPTIONAL Revamp Control into automation
 class Control
 {
     public:

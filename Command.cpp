@@ -495,6 +495,97 @@ void Command::co2Pump(FH_CommandParser::Argument *args, char *response)
 
 }
 
+bool Command::flowZero(char flow)
+{
+    bool retval = true;
+    bool badf = false;
+
+    switch (flow)
+    {
+        case 'g':
+            settings.gasFlowIntercept = -(readings.flowGas);
+            break;
+        case 'o':
+            settings.oaFlowIntercept = -(readings.flowOa);
+            break;
+        case 'a':
+            settings.amFlowIntercept = -(readings.flowAm);
+            break;
+        default:
+            badf = true;
+    }
+    responseBuff.stringPacket.chars[0] = 0;
+    if (badf)
+    {
+        sprintf(responseBuff.stringPacket.chars,"Flow should be g,o, or a, not %c", flow);
+        retval = false;
+    }
+    else
+    {
+        sprintf(responseBuff.stringPacket.chars,"Flow %c zero set.", flow);
+        //sprintf(responseBuff,"PID %c K%c set", pid, kConst);
+    }
+    return retval;
+}
+
+void Command::flowZero(FH_CommandParser::Argument *args, char *response)
+{
+    String pidS = args[0].asString;
+    command.flowZero(pidS.charAt(0));
+    strcpy(response, responseBuff.stringPacket.chars);
+}
+
+bool Command::flowSpan(char flow, uint64_t correctFlow)
+{
+    bool retval = true;
+    bool badf = false;
+
+    switch (flow)
+    {
+        case 'g':
+            if (correctFlow > 0)
+                settings.gasFlowSlope = ((float)correctFlow / (float)readings.flowGas);
+            else
+                settings.gasFlowSlope = 1;
+            break;
+        case 'o':
+            if (correctFlow > 0)
+                settings.oaFlowSlope = ((float)correctFlow / (float)readings.flowOa);
+            else
+                settings.oaFlowSlope = 1; 
+            break;
+        case 'a':
+            if (correctFlow > 0)
+                settings.amFlowSlope = ((float)correctFlow / (float)readings.flowAm);
+            else
+                settings.amFlowSlope = 1;
+            break;
+        default:
+            badf = true;
+    }
+    responseBuff.stringPacket.chars[0] = 0;
+    if (badf)
+    {
+        sprintf(responseBuff.stringPacket.chars,"Flow should be g,o, or a, not %c", flow);
+        retval = false;
+    }
+    else
+    {
+        sprintf(responseBuff.stringPacket.chars,"Flow %c slope set.", flow);
+        //sprintf(responseBuff,"PID %c K%c set", pid, kConst);
+    }
+    return retval;
+}
+
+void Command::flowSpan(FH_CommandParser::Argument *args, char *response)
+{
+    String channel = args[0].asString;
+    uint64_t flow = args[1].asUInt64;
+    char ch = channel.charAt(0);
+    command.flowSpan(ch, flow);
+    strcpy(response, responseBuff.stringPacket.chars);
+}
+
 void Command::init()
 {
     parser.registerCommand("sf","su", &setFlow);
@@ -511,6 +602,8 @@ void Command::init()
     parser.registerCommand("df","", &sendDataPacketFormat);
     parser.registerCommand("st","s", &setTime);
     parser.registerCommand("co2p","u", &co2Pump);
+    parser.registerCommand("fz","s", &flowZero);
+    parser.registerCommand("fs","su", &flowSpan);
 }
 
 

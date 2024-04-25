@@ -274,8 +274,8 @@ float Driver_ppsystemsCO2::calculateCO2Mass(float CO2_concentration_PPM, float f
     // Calculate mass of CO2 collected
     float mass_CO2 = n_CO2 * M_CO2;
 
-    // return milligrams
-    return mass_CO2 * 1000;
+    // return grams
+    return mass_CO2;
 }
 
 void Driver_ppsystemsCO2::updateAccumulators()

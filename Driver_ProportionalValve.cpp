@@ -13,6 +13,8 @@ Driver_ProportionalValve::Driver_ProportionalValve(
             double *pKp,
             double *pKi,
             double *pKd,
+            float *iflowSlope,
+            float *iflowIntercept,
             char marker,
             uint_fast8_t period)
 {
@@ -29,6 +31,8 @@ Driver_ProportionalValve::Driver_ProportionalValve(
   kp = pKp;
   ki = pKi;
   kd = pKd;
+  flowSlope = iflowSlope;
+  flowIntercept = iflowIntercept;
   enabled = false;
   //pid = &PID(readback, &valveSetting, setpoint, kp, ki, kd, DIRECT);
   pid = new PID(readback, &valveSetting, setpoint, *kp, *ki, *kd, 0);
@@ -99,7 +103,6 @@ int Driver_ProportionalValve::getAnalogFlow()
 
 double Driver_ProportionalValve::calculateFlowRate(double voltage, const std::vector<FlowData>& flowTable) 
 {
-    // TODO - flow rate zero offset and scaling factor
     double retValue = -1;
     // Check if voltage is outside the range
     if (voltage < flowTable.front().voltage_vdc)
@@ -164,6 +167,8 @@ int Driver_ProportionalValve::getFlow()
       flow = -1;
     }
   }
+  flow = (int) ((float)flow + *flowIntercept);
+  flow = (int) ((float)flow * *flowSlope);
   return flow;
 }
 

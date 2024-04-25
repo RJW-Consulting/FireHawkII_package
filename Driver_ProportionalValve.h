@@ -38,8 +38,11 @@ class Driver_ProportionalValve
                     double *pKp,
                     double *pKi,
                     double *pKd,
+                    float *iflowSlope,
+                    float *iflowIntercept,
                     char marker,
-                    uint_fast8_t period);
+                    uint_fast8_t period
+                    );
         void init();
         void tick();
         void enablePID(bool doEnable){ enabled = doEnable;};
@@ -71,6 +74,8 @@ class Driver_ProportionalValve
         double *kp;
         double *ki;
         double *kd;
+        float *flowSlope;
+        float *flowIntercept;
         int manualValveSetting = -1;
         int pwmPin = -1;
         bool enabled = false;

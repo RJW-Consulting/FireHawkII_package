@@ -30,7 +30,6 @@ char section[] = "settings";
 
 void DataLogger::loadSettings()
 {
-    // TODO - implement settings for flow zero and scaling factors
     bool wasLogging = false;
     if (logFileName != "")
     {
@@ -57,6 +56,17 @@ void DataLogger::loadSettings()
     settings.coIntercept1 = ini.getf(section, "coIntercept1", 0);
     settings.coSlope2 = ini.getf(section, "coSlope2", 1.0);
     settings.coIntercept2 = ini.getf(section, "coIntercept2", 0);
+    settings.gasFlowSlope = ini.getf(section, "gasFlowSlope", 1.0);
+    settings.gasFlowIntercept = ini.getf(section, "gasFlowIntercept", 0);
+    settings.oaFlowSlope = ini.getf(section, "oaFlowSlope", 1.0);
+    settings.oaFlowIntercept = ini.getf(section, "oaFlowIntercept", 0);
+    settings.amFlowSlope = ini.getf(section, "amFlowSlope", 1.0);
+    settings.amFlowIntercept = ini.getf(section, "amFlowIntercept", 0);
+
+    gasValve.updateKs();
+    oaValve.updateKs();
+    amValve.updateKs();
+
     if (wasLogging)
     {
         beginLogging();
@@ -92,6 +102,12 @@ bool DataLogger::saveSettings()
     success &= ini.put(section, "coIntercept1", (INI_REAL) settings.coIntercept1);
     success &= ini.put(section, "coSlope2", (INI_REAL) settings.coSlope2);
     success &= ini.put(section, "coIntercept2", (INI_REAL) settings.coIntercept2);
+    success &= ini.put(section, "gasFlowSlope", (INI_REAL) settings.gasFlowSlope);
+    success &= ini.put(section, "gasFlowIntercept", (INI_REAL) settings.gasFlowIntercept);
+    success &= ini.put(section, "oaFlowSlope", (INI_REAL) settings.oaFlowSlope);
+    success &= ini.put(section, "oaFlowIntercept", (INI_REAL) settings.oaFlowIntercept);
+    success &= ini.put(section, "amFlowSlope", (INI_REAL) settings.amFlowSlope);
+    success &= ini.put(section, "amFlowIntercept", (INI_REAL) settings.amFlowIntercept);
 
     if (wasLogging)
     {

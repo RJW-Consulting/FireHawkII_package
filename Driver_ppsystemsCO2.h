@@ -7,12 +7,13 @@
 class Driver_ppsystemsCO2
 {
   public: 
+  // TODO - implement CO2 monitor initialization
     Driver_ppsystemsCO2();
     void open(int baud, DateTime *now, uint8_t interval);
     void tick();
     char getState();
     void startZero();
-    // TODO - Implement CO2 Span/scale method
+    // TODO - OPTIONAL Implement CO2 Span/scale method
     int getZeroSec();
     int getZeroEndSec();
     float getMeasurement(DateTime &measurementTime);

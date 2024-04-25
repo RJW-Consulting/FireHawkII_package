@@ -60,6 +60,9 @@ class Command
         bool setTime(String& datetime);
         void zeroCO();
         void spanCO(float spanPPM);
+        bool flowZero(char flow);
+        bool flowSpan(char flow, uint64_t intercept);
+
     private:
         FH_CommandParser parser;
         void respondOK();
@@ -71,15 +74,17 @@ class Command
         static void setFlowManual(FH_CommandParser::Argument *args, char *response);
         static void saveSettings(FH_CommandParser::Argument *args, char *response);
         static void restoreSettings(FH_CommandParser::Argument *args, char *response);
-        // TODO - implement command to set zero flow
-        // TODO - implement command to set flow scaling factor
+        // TODO - test command to set zero flow
+        // TODO - test command to set flow scaling factor
         static void setPumpSpeed(FH_CommandParser::Argument *args, char *response);
         static void zeroCO2(FH_CommandParser::Argument *args, char *response);
         static void sendDataPacketFormat(FH_CommandParser::Argument *args, char *response);
         static void setTime(FH_CommandParser::Argument *args, char *response);
         static void zeroCO(FH_CommandParser::Argument *args, char *response);
         static void spanCO(FH_CommandParser::Argument *args, char *response);
-        // TODO - Implement command for CO2 span/scale
+        static void flowZero(FH_CommandParser::Argument *args, char *response);
+        static void flowSpan(FH_CommandParser::Argument *args, char *response);
+        // TODO - OPTIONAL Implement command for CO2 span/scale
         static void co2Pump(FH_CommandParser::Argument *args, char *response);
         RadioPacket packet;
         uint8_t commandBuffer[RADIO_COMMAND_QUEUE_RECORD_SIZE];

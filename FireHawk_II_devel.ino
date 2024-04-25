@@ -76,7 +76,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #define RELAY_ON_PIN 5
 #define RELAY_OFF_PIN 6
 #define VALVE_CONTROL_PIN 10 
-#define STATUS_LED_PIN 11
+#define STATUS_LED_PIN 4
 
 #define STEP_TEST 1
 
@@ -162,6 +162,8 @@ Driver_ProportionalValve gasValve(
                   &settings.gasPIDKp,
                   &settings.gasPIDKi,
                   &settings.gasPIDKd,
+                  &settings.gasFlowSlope,
+                  &settings.gasFlowIntercept,
                   'g',
                   PID_PERIOD
                   );
@@ -178,6 +180,8 @@ Driver_ProportionalValve oaValve(
                   &settings.oaPIDKp,
                   &settings.oaPIDKi,
                   &settings.oaPIDKd,
+                  &settings.oaFlowSlope,
+                  &settings.oaFlowIntercept,
                   'o',
                   PID_PERIOD
                   );
@@ -194,6 +198,8 @@ Driver_ProportionalValve amValve(
                   &settings.amPIDKp,
                   &settings.amPIDKi,
                   &settings.amPIDKd,
+                  &settings.amFlowSlope,
+                  &settings.amFlowIntercept,
                   'a',
                   PID_PERIOD
                   );
@@ -213,6 +219,7 @@ Radio radio;
 #define INTERVAL_MS_CLOCK 1
 #define INTERVAL_DRIVER_TICK 10
 #define INTERVAL_DRIVER_TEST 1000
+#define INTERVAL_LED_TICK 100
 
 static void task_ms_clock(void *pvParameters)
 {
@@ -224,6 +231,18 @@ static void task_ms_clock(void *pvParameters)
     myDelayMs(INTERVAL_MS_CLOCK);
   }
 }
+
+static void task_status_led(void *pvParameters)
+{
+  Serial.println("Status LED task started");
+
+  while(1)
+  {
+    led.tick();
+    myDelayMs(INTERVAL_LED_TICK);
+  }
+}
+
 
 bool initialized = false;
 
@@ -252,7 +271,6 @@ static void task_driver_tick(void *pvParameters)
       gasValve.tick();
       oaValve.tick();    
       amValve.tick();
-      //led.tick();
       p1.tick();
       p2.tick();
       radio.tick();
@@ -315,6 +333,7 @@ static void task_test_drivers(void *pvParameters)
       String cmdLine = cline;
       command.checkAndParseCommandLine(cmdLine);
     }
+    /*
     switch (co2.getState())
     {
       case CO2_STATE_MEASURING:
@@ -330,6 +349,7 @@ static void task_test_drivers(void *pvParameters)
         led.setStatus(CONTROL_STATE_SENDING_LOG);
         break;
     }
+    */
     myDelayMs(INTERVAL_DRIVER_TEST);
   }
 }
@@ -342,6 +362,7 @@ static void task_test_drivers(void *pvParameters)
 TaskHandle_t handle_clock_task;
 TaskHandle_t handle_driver_tick_task;
 TaskHandle_t handle_test_task;
+TaskHandle_t handle_led_task;
 
 QueueHandle_t handle_command_queue;
 QueueHandle_t handle_command_response_queue;
@@ -455,9 +476,10 @@ void setup()
   // Create the threads that will be managed by the rtos
   // Sets the stack size and priority of each task
   // Also initializes a handler pointer to each task, which are important to communicate with and retrieve info from tasks
-  xTaskCreate(task_ms_clock,     "msClock",       128, NULL, tskIDLE_PRIORITY + 3, &handle_clock_task);
-  xTaskCreate(task_driver_tick,     "drvrTick",       1024, NULL, tskIDLE_PRIORITY + 2, &handle_driver_tick_task);
-  xTaskCreate(task_test_drivers, "test", 256, NULL, tskIDLE_PRIORITY + 1, &handle_test_task);
+  xTaskCreate(task_ms_clock,     "msClock",       128, NULL, tskIDLE_PRIORITY + 4, &handle_clock_task);
+  xTaskCreate(task_driver_tick,     "drvrTick",       1024, NULL, tskIDLE_PRIORITY + 3, &handle_driver_tick_task);
+  xTaskCreate(task_test_drivers, "test", 256, NULL, tskIDLE_PRIORITY + 2, &handle_test_task);
+  xTaskCreate(task_status_led, "test", 128, NULL, tskIDLE_PRIORITY + 1, &handle_led_task);
 
   // Start the RTOS, this function will never return and will schedule the tasks.
   vTaskStartScheduler();

@@ -13,6 +13,7 @@ void Driver_StatusLED::init(int16_t pin)
 
 void Driver_StatusLED::tick()
 {
+    setStatus();
     if (flashCount == 0)
     {
         if (flash == LED_FLASH_SLOW)
@@ -27,86 +28,50 @@ void Driver_StatusLED::tick()
     }
     if (flash == LED_FLASH_NONE)
     {
-        pixel.fill(color);
+        pixel.fill(color1);
         pixel.show();
     }
     else
     {
         if (isOn)
         {
-            pixel.fill(color);          
+            pixel.fill(color1);          
             pixel.show();
         }
         else
         {
-            pixel.fill(pixel.Color(0,0,0));
+            pixel.fill(color2);
             pixel.show();
         }
         flashCount--;
     }
 }
 
-/*
-#define CONTROL_STATE_IDLE
-#define CONTROL_STATE_WAIT_TRIGGER
-#define CONTROL_STATE_SAMPLE_0
-#define CONTROL_STATE_SAMPLE_1
-#define CONTROL_STATE_SAMPLE_2
-#define CONTROL_STATE_SAMPLE_CO2_ZERO
-#define CONTROL_STATE_SAMPLE_CO2_SPAN
-#define CONTROL_STATE_SAMPLE_CO_ZERO
-#define CONTROL_STATE_SAMPLE_CO_SPAN
-#define CONTROL_STATE_SENDING_LOG
-*/
 
-void Driver_StatusLED::setStatus(uint8_t status)
+void Driver_StatusLED::setStatus()
 {
-    if (status != currStatus)
+    flash = LED_FLASH_FAST;
+
+    if (!settings.baseStationAnswering)
     {
-        switch (status)
-        {
-            case CONTROL_STATE_IDLE:
-                color = pixel.Color(0, 255, 0);
-                flash = LED_FLASH_NONE;
-                break;
-            case CONTROL_STATE_WAIT_TRIGGER:
-                color = pixel.Color(0, 255, 0);
-                flash = LED_FLASH_SLOW;
-                break;
-            case CONTROL_STATE_SAMPLE_0:
-                color = pixel.Color(255, 0, 0);
-                flash = LED_FLASH_FAST;
-                break;
-            case CONTROL_STATE_SAMPLE_1:
-                color = pixel.Color(255, 255, 0);
-                flash = LED_FLASH_FAST;
-                break;
-            case CONTROL_STATE_SAMPLE_2:
-                color = pixel.Color(0, 255, 255);
-                flash = LED_FLASH_FAST;
-                break;
-            case CONTROL_STATE_SAMPLE_CO2_ZERO:
-                color = pixel.Color(0, 0, 255);
-                flash = LED_FLASH_FAST;
-                break;
-            case CONTROL_STATE_SAMPLE_CO2_SPAN:
-                color = pixel.Color(0, 0, 255);
-                flash = LED_FLASH_SLOW;
-                break;
-            case CONTROL_STATE_SAMPLE_CO_ZERO:
-                color = pixel.Color(255, 0, 255);
-                flash = LED_FLASH_FAST;
-                break;
-            case CONTROL_STATE_SAMPLE_CO_SPAN:
-                color = pixel.Color(255, 0, 255);
-                flash = LED_FLASH_SLOW;
-                break;
-            case CONTROL_STATE_SENDING_LOG:
-                color = pixel.Color(255, 255, 255);
-                flash = LED_FLASH_FAST;
-                break;
-        }
-        currStatus = status;
+        // base station answering is green 
+        color1 = pixel.Color(0, 255, 0);
     }
-    flashCount = 0;
+    else
+    {
+        // no radio contact is red 
+        color1 = pixel.Color(255, 0, 0);
+    }
+
+    if (settings.co2State == 'M')
+    {
+        // CO2 measuring is blue 
+        color2 = pixel.Color(0, 0, 255);
+    }
+    else
+    {
+        // Any other CO2 state is yellow 
+        color2 = pixel.Color(255, 255, 0);
+    }
+
 }
