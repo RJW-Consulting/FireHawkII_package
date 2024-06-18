@@ -232,6 +232,7 @@ void Driver_ProportionalValve::tick()
             pid->SetTunings(*kp,*ki,*kd);
             ksChanged = false;
           }
+          Serial.print('.');
           pid->Compute();
           setValvePower((int) valveSetting);
       }

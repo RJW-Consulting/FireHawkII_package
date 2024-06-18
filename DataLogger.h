@@ -5,11 +5,12 @@
 #include "string.h" 
 #include <SPI.h>
 #include <SD.h>
-#include "minIni.h"
 #include "RTClib.h"
 #include "FreeRTOS.h"
 #include "Driver_ppsystemsCO2.h"
 #include "Driver_ProportionalValve.h"
+#include "minIni.h"
+
 
 
 #define SD_CARD_CS 10                                   

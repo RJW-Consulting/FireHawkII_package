@@ -26,6 +26,7 @@ class Driver_ppsystemsCO2
     bool getPumpState();
     void updateAccumulators();
     void resetAccumulators();
+    void initMonitor();
   
   private:
     DateTime *nowPtr;
@@ -42,6 +43,7 @@ class Driver_ppsystemsCO2
     String inText;
     String co2message;
     char state;
+    bool monitorInitialized;
 
     bool receivedMeasurement();
     bool receivedWait();

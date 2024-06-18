@@ -88,6 +88,6 @@ class Driver_ProportionalValve
 
 #define MIN_DAC 0
 #define MAX_DAC 4095
-#define MAX_PROP_VALVE_DAC 4000
+#define MAX_PROP_VALVE_DAC 4095
 
 #endif
