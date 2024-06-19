@@ -46,13 +46,13 @@ bool Command::setFlow(char ch, uint64_t flow)
     bool retval = true;
     switch (ch)
     {
-        case 'g':
+        case 's':
             settings.flowGasSetPoint = flow;
             break;
-        case 'o':
+        case 'q':
             settings.flowOaSetPoint = flow;
             break;
-        case 'a':
+        case 't':
             settings.flowAmSetPoint = flow;
             break;
         default:
@@ -135,6 +135,13 @@ bool Command::enableLogFile(bool enable)
     return true;
 }
 
+void Command::showPIDks(FH_CommandParser::Argument *args, char *response)
+{
+    response[0] = 0;
+    sprintf(responseBuff.stringPacket.chars,"PIDs: Sorb P=%5.3lf, I=%5.3lf, D=%5.3lf  Tef P=%5.3lf, I=%5.3lf, D=%5.3lf  Quar P=%5.3lf, I=%5.3lf, D=%5.3lf", settings.gasPIDKp, settings.gasPIDKi, settings.gasPIDKd,settings.amPIDKp, settings.amPIDKi, settings.amPIDKd, settings.oaPIDKp, settings.oaPIDKi, settings.oaPIDKd );
+    strcpy(response, responseBuff.stringPacket.chars);
+}
+
 void Command::setPIDk(FH_CommandParser::Argument *args, char *response)
 {
     response[0] = 0;
@@ -154,7 +161,7 @@ bool Command::setPIDk(char pid, char kConst, double value)
 
     switch (pid)
     {
-        case 'g':
+        case 's':
             switch (kConst)
             {
                 case 'p':
@@ -173,7 +180,7 @@ bool Command::setPIDk(char pid, char kConst, double value)
             if (!badK)
                 gasValve.updateKs();
             break;
-        case 'o':
+        case 'q':
             switch (kConst)
             {
                 case 'p':
@@ -192,7 +199,7 @@ bool Command::setPIDk(char pid, char kConst, double value)
             if (!badK)
                 oaValve.updateKs();
             break;
-        case 'a':
+        case 't':
             switch (kConst)
             {
                 case 'p':
@@ -217,7 +224,7 @@ bool Command::setPIDk(char pid, char kConst, double value)
     responseBuff.stringPacket.chars[0] = 0;
     if (badP)
     {
-        sprintf(responseBuff.stringPacket.chars,"PID should be g,o, or a, not %c", pid);
+        sprintf(responseBuff.stringPacket.chars,"PID should be s,q, or t, not %c", pid);
         retval = false;
     }
     else if (badK)
@@ -304,13 +311,13 @@ bool Command::setFlowManual(char pid, int64_t value)
 
     switch (pid)
     {
-        case 'g':
+        case 's':
             gasValve.setManual(value);
             break;
-        case 'o':
+        case 'q':
             oaValve.setManual(value);
             break;
-        case 'a':
+        case 't':
             amValve.setManual(value);
             break;
         default:
@@ -319,7 +326,7 @@ bool Command::setFlowManual(char pid, int64_t value)
     responseBuff.stringPacket.chars[0] = 0;
     if (badP)
     {
-        sprintf(responseBuff.stringPacket.chars,"valve should be g,o, or a, not %c", pid);
+        sprintf(responseBuff.stringPacket.chars,"valve should be s,q, or t, not %c", pid);
         retval = false;
     }
     else
@@ -502,13 +509,13 @@ bool Command::flowZero(char flow)
 
     switch (flow)
     {
-        case 'g':
+        case 's':
             settings.gasFlowIntercept = -(readings.flowGas);
             break;
-        case 'o':
+        case 'q':
             settings.oaFlowIntercept = -(readings.flowOa);
             break;
-        case 'a':
+        case 't':
             settings.amFlowIntercept = -(readings.flowAm);
             break;
         default:
@@ -517,7 +524,7 @@ bool Command::flowZero(char flow)
     responseBuff.stringPacket.chars[0] = 0;
     if (badf)
     {
-        sprintf(responseBuff.stringPacket.chars,"Flow should be g,o, or a, not %c", flow);
+        sprintf(responseBuff.stringPacket.chars,"Flow should be s,q, or t, not %c", flow);
         retval = false;
     }
     else
@@ -542,19 +549,19 @@ bool Command::flowSpan(char flow, uint64_t correctFlow)
 
     switch (flow)
     {
-        case 'g':
+        case 's':
             if (correctFlow > 0)
                 settings.gasFlowSlope = ((float)correctFlow / (float)readings.flowGas);
             else
                 settings.gasFlowSlope = 1;
             break;
-        case 'o':
+        case 'q':
             if (correctFlow > 0)
                 settings.oaFlowSlope = ((float)correctFlow / (float)readings.flowOa);
             else
                 settings.oaFlowSlope = 1; 
             break;
-        case 'a':
+        case 't':
             if (correctFlow > 0)
                 settings.amFlowSlope = ((float)correctFlow / (float)readings.flowAm);
             else
@@ -566,7 +573,7 @@ bool Command::flowSpan(char flow, uint64_t correctFlow)
     responseBuff.stringPacket.chars[0] = 0;
     if (badf)
     {
-        sprintf(responseBuff.stringPacket.chars,"Flow should be g,o, or a, not %c", flow);
+        sprintf(responseBuff.stringPacket.chars,"Flow should be s,q, or t, not %c", flow);
         retval = false;
     }
     else
@@ -593,6 +600,7 @@ void Command::init()
     parser.registerCommand("ss","u", &setSampleSet);
     parser.registerCommand("le","u", &enableLogFile);
     parser.registerCommand("pk","ssd", &setPIDk);
+    parser.registerCommand("sks","", &showPIDks);
     parser.registerCommand("set","", &saveSettings);
     parser.registerCommand("rst","", &restoreSettings);
     parser.registerCommand("ps","u", &setPumpSpeed);

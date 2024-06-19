@@ -71,6 +71,7 @@ class Command
         static void setSampleSet(FH_CommandParser::Argument *args, char *response);
         static void enableLogFile(FH_CommandParser::Argument *args, char *response);
         static void setPIDk(FH_CommandParser::Argument *args, char *response);
+        static void showPIDks(FH_CommandParser::Argument *args, char *response);
         static void setFlowManual(FH_CommandParser::Argument *args, char *response);
         static void saveSettings(FH_CommandParser::Argument *args, char *response);
         static void restoreSettings(FH_CommandParser::Argument *args, char *response);
