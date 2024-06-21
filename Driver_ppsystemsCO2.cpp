@@ -41,7 +41,8 @@ void Driver_ppsystemsCO2::tick()
     int pos = inText.indexOf('\n');
     if (pos >= 0)
     {
-      //Serial.println(inText);
+      Serial.print("CO2>");
+      Serial.println(inText);
       co2message = inText.substring(0,pos+1);
       inText = inText.substring(pos + 1);
     }
@@ -91,7 +92,7 @@ DateTime Driver_ppsystemsCO2::getMeasurementTime()
 bool Driver_ppsystemsCO2::receivedMeasurement()
 {
   bool ret = false;
-  Serial.println(this->inText);
+  //Serial.println(this->inText);
   size_t pos = this->co2message.indexOf("M ");
 //  Serial.printf("pos = %d\n", pos);
   if (pos != -1)
@@ -103,7 +104,7 @@ bool Driver_ppsystemsCO2::receivedMeasurement()
 
        String measurementString = this->co2message.substring(pos,pos2);
 
-      Serial.print(measurementString);
+      //Serial.print(measurementString);
       if (parseMeasurement(measurementString))
       {
         this->state = CO2_STATE_MEASURING;
@@ -327,7 +328,7 @@ bool Driver_ppsystemsCO2::getPumpState()
   
 void Driver_ppsystemsCO2::initMonitor()
 {
-  // TODO Fix CO2 monitor initialization
+  // TODO-Fix CO2 monitor initialization
   send("S,11,1\n");  // reading every 1 second
   send("F0\n");      // readout CO2 only
   send("A0\n");     // turn off automatic zeros

@@ -593,8 +593,15 @@ void Command::flowSpan(FH_CommandParser::Argument *args, char *response)
     strcpy(response, responseBuff.stringPacket.chars);
 }
 
+void Command::sendVersion(FH_CommandParser::Argument *args, char *response)
+{
+    response[0] = 0;
+    strcpy(response, versionString.c_str());
+}
+
 void Command::init()
 {
+    parser.registerCommand("vs","", &sendVersion);
     parser.registerCommand("sf","su", &setFlow);
     parser.registerCommand("sm","si", &setFlowManual);
     parser.registerCommand("ss","u", &setSampleSet);

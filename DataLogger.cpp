@@ -158,6 +158,8 @@ bool DataLogger::beginLogging()
         }
         else 
         {
+            currentFile.write(getLogStringHeader().c_str());
+            currentFile.flush();
             retVal = true;
         }
     }
@@ -204,20 +206,21 @@ String DataLogger::getLogStringHeader()
     
     header = "";
     header += "date_time,";
-    header += "sample_channel,";
+    header += "send_success,";
+    header += "sample_set,";
     header += "sample_pump,";
     header += "co2_pump,";
-    header += "flow_setpoint_gas,";
-    header += "flow_gas,";
-    header += "flow_setpoint_oa,";
-    header += "flow_oa,";
-    header += "flow_setpoint_am,";
-    header += "flow_am,";
+    header += "flow_setpoint_sorbent,";
+    header += "flow_sorbent,";
+    header += "flow_setpoint_quartz,";
+    header += "flow_quartz,";
+    header += "flow_setpoint_teflon,";
+    header += "flow_teflon,";
     header += "co2_status,";
     header += "co2_ppm,";
-    header += "total_co2_gas,";
-    header += "total_co2_oa,";
-    header += "total_co2_am,";
+    header += "total_co2_sorbent,";
+    header += "total_co2_quartz,";
+    header += "total_co2_teflon,";
     header += "co1_v,";
     header += "co1_ppm,";
     header += "co2_v,";
@@ -229,6 +232,10 @@ String DataLogger::getLogStringHeader()
     header += "battery_v,";
     header += "pressure1,";
     header += "pressure2,";
+    header += "sorbent_valve_pwr,";
+    header += "quartz_valve_pwr,";
+    header += "teflon_valve_pwr";
+    header += "\n";
     return header;
 }
 
@@ -254,7 +261,7 @@ String DataLogger::buildLogString()
     {
         co2Reading += "***";
     }
-    line = "/*"; 
+    line = ""; 
     line += readings.measurementTime.timestamp();
     line += ",";
     line += String(settings.baseStationAnswering);
@@ -314,7 +321,7 @@ String DataLogger::buildLogString()
     line += String(oaValve.getValveSetting());
     line += ",";
     line += String(amValve.getValveSetting());
-    line += "*/\n";
+    line += "\n";
 
     return line;
 }

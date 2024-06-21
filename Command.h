@@ -85,6 +85,7 @@ class Command
         static void spanCO(FH_CommandParser::Argument *args, char *response);
         static void flowZero(FH_CommandParser::Argument *args, char *response);
         static void flowSpan(FH_CommandParser::Argument *args, char *response);
+        static void sendVersion(FH_CommandParser::Argument *args, char *response);
         // TODO - OPTIONAL Implement command for CO2 span/scale
         static void co2Pump(FH_CommandParser::Argument *args, char *response);
         RadioPacket packet;

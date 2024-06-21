@@ -22,8 +22,8 @@
 
 
 
-
 /*
+jlink.exe -device ATSAMD51J19 -if SWD -speed 4000 -autoconnect 1
 LoadFile ../.build/FireHawk_II_devel.ino.elf
 */
 
@@ -60,7 +60,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include "Radio.h"
 #include "globals.h"
 
-
+String versionString = "Firehawk II FW Vers 1.0";
 
 //**************************************************************************
 // Type Defines and Constants
@@ -469,6 +469,7 @@ void setup()
   */
 
   Serial.println("USB Serial Initialized");
+  Serial.println(versionString);
   // Disable the radio so it does not hold onto the MISO pin
   // and get in the way of the SD card
   // (temporary measure until radio used)

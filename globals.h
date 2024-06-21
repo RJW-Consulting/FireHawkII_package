@@ -111,6 +111,7 @@ union RadioPacket{
     struct StringPacket stringPacket;
 };
 
+extern String versionString;
 extern struct Readings readings;
 extern struct Settings settings;
 

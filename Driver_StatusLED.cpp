@@ -4,7 +4,7 @@
 void Driver_StatusLED::init(int16_t pin)
 {
     pixel.setPin(pin);
-    pixel.updateLength(1);
+    pixel.updateLength(LED_STRAND_LENGTH);
     pixel.begin();
     flashCount = 0;
     isOn = true;

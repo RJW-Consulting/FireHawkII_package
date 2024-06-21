@@ -32,6 +32,6 @@ class Radio
 #define RFM95_RST   6
 
 
-#define RF95_FREQ 915.0
+#define RF95_FREQ 434.0
 
 #endif
