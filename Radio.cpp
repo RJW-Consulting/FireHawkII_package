@@ -43,7 +43,7 @@ void Radio::tick()
         if (radio_manager.recvfromAck((uint8_t *) &packetBuffer, &len, &from))
         {
             //packetBuffer.StringPacket[len-1] = 0;
-            xQueueSend(handle_command_queue, &packetBuffer, portMAX_DELAY);
+            xQueueSend(handle_command_queue, &packetBuffer.stringPacket.chars, portMAX_DELAY);
         }
     }
 

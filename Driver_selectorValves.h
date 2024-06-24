@@ -4,9 +4,8 @@
 #include "Arduino.h" 
 #include "PCA9685.h"
 #include "globals.h"
+#include "I2C_Addrs.h"
 
-//#define PCA9685_BASE_I2C_ADDR 0x40
-#define PCA9685_BASE_I2C_ADDR 0x41
 
 struct SelValveState {
     PCA9685::Percent state;

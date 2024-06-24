@@ -1,3 +1,5 @@
+
+
 #include <FreeRTOS.h>
 #include <croutine.h>
 #include <deprecated_definitions.h>
@@ -41,6 +43,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_ADS1X15.h>
 #include <Adafruit_MS8607.h>
+#include <Adafruit_MCP9808.h>
 #include <Adafruit_Sensor.h>
 #include <rp2040_pio.h>
 #include <TCA9548A-SOLDERED.h>
@@ -54,13 +57,15 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include "Driver_Pump.h"
 #include "Driver_mprls.h"
 #include "Driver_PTRH.h"
+#include "Driver_Temp_MCP9808.h"
 #include "Control.h"
 #include "Command.h"
 #include "DataLogger.h"
 #include "Radio.h"
 #include "globals.h"
+#include "I2C_Addrs.h"
 
-String versionString = "Firehawk II FW Vers 1.0";
+String versionString = "Firehawk II FW Vers 1.1";
 
 //**************************************************************************
 // Type Defines and Constants
@@ -71,8 +76,6 @@ String versionString = "Firehawk II FW Vers 1.0";
 #define ERROR_LED_LIGHTUP_STATE  HIGH // the state that makes the led light up on your board, either low or high
 
 
-#define CURRENT_SENSOR_I2C 0x40
-#define FLOW_SENSOR_I2C 0x07
 #define RELAY_ON_PIN 5
 #define RELAY_OFF_PIN 6
 #define VALVE_CONTROL_PIN 10 
@@ -109,9 +112,6 @@ void myDelayMsUntil(TickType_t *previousWakeTime, int ms)
 #define gas_FLOW_MUX_CHANNEL 0
 #define oa_FLOW_MUX_CHANNEL 1
 #define am_FLOW_MUX_CHANNEL 2
-#define FLOW_SENSOR_I2C 0x07
-#define GAS_SENSOR_ADC_I2C 0x48
-#define FLOW_ADC_I2C 0x49
 #define gas_FLOW_ADC_CHANNEL 0x2
 #define oa_FLOW_ADC_CHANNEL 0x0
 #define am_FLOW_ADC_CHANNEL 0x1
@@ -132,6 +132,7 @@ Adafruit_INA219 ina219;
 Adafruit_MCP4728 mcp;
 Adafruit_ADS1115 ads1115_a;
 Adafruit_ADS1115 ads1115_b;
+Adafruit_MCP9808 mcp9809;
 TCA9548A i2cMux;
 
 int flowAOPin = A0;                               
@@ -142,6 +143,7 @@ Driver_CO co_2;
 Driver_selectorValves selectorValves;
 Driver_StatusLED led;
 Driver_PTRH ptrh;
+Driver_Temp_MCP9808 caseTemp;
 PressureSensor p1(&i2cMux, PSENSOR1_MUX_CHANNEL, &readings.pressure1);
 PressureSensor p2(&i2cMux, PSENSOR2_MUX_CHANNEL, &readings.pressure2);
 
@@ -283,6 +285,7 @@ static void task_driver_tick(void *pvParameters)
       co_1.tick();
       co_2.tick();
       ptrh.tick();
+      caseTemp.tick();
       selectorValves.tick();
       pump.tick();
       gasValve.tick();
@@ -412,6 +415,7 @@ void initDrivers()
   co_1.init(&now, &readings.coConc1, &readings.coV1, &settings.coSlope1, &settings.coIntercept1, &ads1115_a,  CO_1_ADC_CHANNEL);
   co_2.init(&now, &readings.coConc2, &readings.coV2, &settings.coSlope2, &settings.coIntercept2, &ads1115_a,  CO_2_ADC_CHANNEL);
   ptrh.init(&now, &gasPTRH);
+  caseTemp.init(&now, &mcp9809, MCP9808_T_SENSOR_I2C_ADDR);
   led.init(STATUS_LED_PIN);  
   //p1.init();
   //p2.init();
