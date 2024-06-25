@@ -80,7 +80,9 @@ bool Command::setSampleSet(uint set)
     if (readings.sampleSet != set)
         co2.resetAccumulators();
     if (set > 4)
+    {
         strcpy(responseBuff.stringPacket.chars, "set must be 0-4");
+    }
     else
     {
         if (set == 0)
@@ -599,6 +601,15 @@ void Command::sendVersion(FH_CommandParser::Argument *args, char *response)
     strcpy(response, versionString.c_str());
 }
 
+void Command::send2co2(FH_CommandParser::Argument *args, char *response)
+{
+    response[0] = 0;
+    String command = args[0].asString;
+    co2.send(command);
+    String rstring = "Sent command \""+command+"\" to CO2 monitor.";
+    strcpy(response, rstring.c_str());
+}
+
 void Command::init()
 {
     parser.registerCommand("vs","", &sendVersion);
@@ -616,6 +627,7 @@ void Command::init()
     parser.registerCommand("cos","d", &spanCO);
     parser.registerCommand("df","", &sendDataPacketFormat);
     parser.registerCommand("st","s", &setTime);
+    parser.registerCommand("co2c","s", &send2co2);
     parser.registerCommand("co2p","u", &co2Pump);
     parser.registerCommand("fz","s", &flowZero);
     parser.registerCommand("fs","su", &flowSpan);

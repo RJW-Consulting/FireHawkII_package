@@ -16,7 +16,11 @@ void Driver_selectorValves::init()
     pca9685.setupSingleDevice(Wire,PCA9685_BASE_I2C_ADDR);
     frequencyMin = pca9685.getFrequencyMin();
     frequencyMax = pca9685.getFrequencyMax();
-    pca9685.setToFrequency(frequencyMax);   
+    pca9685.setToFrequency(frequencyMax);  
+    closeGang(0);
+    closeGang(1);
+    closeGang(2);
+    updateValves();
 }
 
 void Driver_selectorValves::setMSClock(uint32_t *msClockPtr)

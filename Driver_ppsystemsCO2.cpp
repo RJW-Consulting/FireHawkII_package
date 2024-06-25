@@ -218,9 +218,10 @@ void Driver_ppsystemsCO2::send(String message)
   }
   else
   {
-    Serial1.println(message);
+    Serial1.print(message+"\r");
   }
 }
+
  bool Driver_ppsystemsCO2::receiveAvailable()
  {
     return (Serial1.available() > 0);

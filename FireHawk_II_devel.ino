@@ -340,7 +340,8 @@ static void task_test_drivers(void *pvParameters)
   //oaValve.setPWMpin(6);
   //amValve.setPWMpin(9);
   initialized = true;
-  selectorValves.openSet(0);
+  //selectorValves.openSet(0);
+
 
 
   while (1)
