@@ -4,22 +4,25 @@
 #include <arduino.h>
 #include "FreeRTOS.h"
 #include "globals.h"
-#include "CommandParser.h"
 #include "DataLogger.h"
 #include "Driver_selectorValves.h"
 #include "Driver_ProportionalValve.h"
 #include "Driver_ppsystemsCO2.h"
 #include "Driver_CO.h"
 #include <RTClib.h>
+#include "CommandParser.h"
 
-#define CP_COMMANDS 16
+
+#define CP_COMMANDS 26
 #define CP_COMMAND_ARGS 4
 #define CP_COMMAND_NAME_LENGTH 4
 #define CP_COMMAND_ARG_SIZE 32
 #define CP_RESPONSE_SIZE 64
 
+
+
 //typedef CommandParser<CP_COMMANDS, CP_COMMAND_ARGS, CP_COMMAND_NAME_LENGTH, CP_COMMAND_ARG_SIZE, CP_RESPONSE_SIZE> FH_CommandParser;
-typedef CommandParser<> FH_CommandParser;
+typedef CommandParser<CP_COMMANDS, CP_COMMAND_ARGS, CP_COMMAND_NAME_LENGTH, CP_COMMAND_ARG_SIZE, CP_RESPONSE_SIZE> FH_CommandParser;
 
 extern Driver_selectorValves selectorValves;
 
