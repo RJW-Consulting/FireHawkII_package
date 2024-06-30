@@ -166,7 +166,7 @@ Driver_ProportionalValve gasValve(
                   &settings.gasPIDKd,
                   &settings.gasFlowSlope,
                   &settings.gasFlowIntercept,
-                  'g',
+                  's',
                   PID_PERIOD
                   );
 Driver_ProportionalValve oaValve(
@@ -184,7 +184,7 @@ Driver_ProportionalValve oaValve(
                   &settings.oaPIDKd,
                   &settings.oaFlowSlope,
                   &settings.oaFlowIntercept,
-                  'o',
+                  'q',
                   PID_PERIOD
                   );
 Driver_ProportionalValve amValve(
@@ -202,7 +202,7 @@ Driver_ProportionalValve amValve(
                   &settings.amPIDKd,
                   &settings.amFlowSlope,
                   &settings.amFlowIntercept,
-                  'a',
+                  't',
                   PID_PERIOD
                   );
 

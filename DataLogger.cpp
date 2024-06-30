@@ -56,6 +56,7 @@ void DataLogger::loadSettings()
     settings.coIntercept1 = ini.getf(section, "coIntercept1", 0);
     settings.coSlope2 = ini.getf(section, "coSlope2", 1.0);
     settings.coIntercept2 = ini.getf(section, "coIntercept2", 0);
+    settings.co2background = ini.getf(section, "co2background", 0);
     settings.gasFlowSlope = ini.getf(section, "gasFlowSlope", 1.0);
     settings.gasFlowIntercept = ini.getf(section, "gasFlowIntercept", 0);
     settings.oaFlowSlope = ini.getf(section, "oaFlowSlope", 1.0);
@@ -102,6 +103,7 @@ bool DataLogger::saveSettings()
     success &= ini.put(section, "coIntercept1", (INI_REAL) settings.coIntercept1);
     success &= ini.put(section, "coSlope2", (INI_REAL) settings.coSlope2);
     success &= ini.put(section, "coIntercept2", (INI_REAL) settings.coIntercept2);
+    success &= ini.put(section, "co2background", (INI_REAL) settings.co2background);
     success &= ini.put(section, "gasFlowSlope", (INI_REAL) settings.gasFlowSlope);
     success &= ini.put(section, "gasFlowIntercept", (INI_REAL) settings.gasFlowIntercept);
     success &= ini.put(section, "oaFlowSlope", (INI_REAL) settings.oaFlowSlope);

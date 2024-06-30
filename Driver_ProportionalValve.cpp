@@ -192,6 +192,7 @@ void Driver_ProportionalValve::setValvePower(int power)
 void Driver_ProportionalValve::tick()
 {
   // 
+  Serial.print(which);
   double flow = getFlow();
   if (FLOW_BUFFER_SIZE > 0)
   {

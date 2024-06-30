@@ -92,6 +92,7 @@ class Command
         static void send2co2(FH_CommandParser::Argument *args, char *response);
         // TODO - OPTIONAL Implement command for CO2 span/scale
         static void co2Pump(FH_CommandParser::Argument *args, char *response);
+        static void co2background(FH_CommandParser::Argument *args, char *response);
         RadioPacket packet;
         uint8_t commandBuffer[RADIO_COMMAND_QUEUE_RECORD_SIZE];
 };

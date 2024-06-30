@@ -610,6 +610,22 @@ void Command::send2co2(FH_CommandParser::Argument *args, char *response)
     strcpy(response, rstring.c_str());
 }
 
+void Command::co2background(FH_CommandParser::Argument *args, char *response)
+{
+    response[0] = 0;
+    float background = (float) args[0].asDouble;
+    if (background < 0)
+    {
+        background = readings.co2Conc;
+    }
+    settings.co2background = background;
+
+    String rstring = "CO2 background set to "+String(background)+" PPM";
+
+    strcpy(response, rstring.c_str());
+}
+
+
 void Command::init()
 {
     parser.registerCommand("vs","", &sendVersion);
@@ -631,6 +647,7 @@ void Command::init()
     parser.registerCommand("co2p","u", &co2Pump);
     parser.registerCommand("fz","s", &flowZero);
     parser.registerCommand("fs","su", &flowSpan);
+    parser.registerCommand("co2b","d", &co2background);
 }
 
 

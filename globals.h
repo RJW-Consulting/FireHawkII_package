@@ -66,6 +66,7 @@ struct Settings {
     float coIntercept1;
     float coSlope2;
     float coIntercept2;
+    float co2background;
     float gasFlowIntercept;
     float gasFlowSlope;
     float oaFlowIntercept;

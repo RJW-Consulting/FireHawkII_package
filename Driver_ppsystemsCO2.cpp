@@ -272,7 +272,7 @@ float Driver_ppsystemsCO2::calculateCO2Mass(float CO2_concentration_PPM, float f
     float CO2_concentration_fraction = CO2_concentration_PPM * 1e-6;
 
     // Calculate volume of CO2 collected using flow and time
-    float volume_collected = flow_m3s * time_seconds;
+    float volume_collected = CO2_concentration_fraction * flow_m3s * time_seconds;
 
     // Calculate moles of CO2 collected using ideal gas law
     float n_CO2 = (pressure_Pa * volume_collected) / (R * temperature_K);
@@ -280,8 +280,8 @@ float Driver_ppsystemsCO2::calculateCO2Mass(float CO2_concentration_PPM, float f
     // Calculate mass of CO2 collected
     float mass_CO2 = n_CO2 * M_CO2;
 
-    // return grams
-    return mass_CO2;
+    // return milligrams
+    return mass_CO2 * 1000;
 }
 
 void Driver_ppsystemsCO2::updateAccumulators()
@@ -290,13 +290,13 @@ void Driver_ppsystemsCO2::updateAccumulators()
   // this must be called before lastMessageTime is updated
   if (readings.sampleSet > 0)
   {
+    float co2conc = readings.co2Conc - settings.co2background;
+    if (co2conc < 0) co2conc = 0;
     float seconds = (float) (this->nowPtr->unixtime() - lastAccumulationTime.unixtime());
-    readings.co2MassGas += calculateCO2Mass(readings.co2Conc, readings.flowGas, seconds, readings.airTemp, readings.pressure);
-    readings.co2MassOa += calculateCO2Mass(readings.co2Conc, readings.flowOa, seconds, readings.airTemp, readings.pressure);
-    readings.co2MassAm += calculateCO2Mass(readings.co2Conc, readings.flowAm, seconds, readings.airTemp, readings.pressure);
-
+    readings.co2MassGas += calculateCO2Mass(co2conc, readings.flowGas, seconds, readings.airTemp, readings.pressure);
+    readings.co2MassOa += calculateCO2Mass(co2conc, readings.flowOa, seconds, readings.airTemp, readings.pressure);
+    readings.co2MassAm += calculateCO2Mass(co2conc, readings.flowAm, seconds, readings.airTemp, readings.pressure);
   }
-
 }
 
 void Driver_ppsystemsCO2::resetAccumulators()
