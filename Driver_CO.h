@@ -12,7 +12,7 @@
 class Driver_CO
 {
     public:
-        void init(DateTime *now, float *coReading_in, float *coVReading_in, float *slope_in, float *intercept_in, Adafruit_ADS1115 *theadc,  int adcChannel);
+        void init(DateTime *now, float *coReading_in, float *coVReading_in, float *op1Reading_in, float *op2Reading_in, float *slope_in, float *intercept_in, Adafruit_ADS1115 *theadc,  int adcChannel);
         void tick();
         void zero();
         void span(float spanPPM);
@@ -26,10 +26,14 @@ class Driver_CO
         int adc_Channel;
         AveragedReadings coBuffer;
         AveragedReadings vBuffer;
+        AveragedReadings vOP1Buffer;
+        AveragedReadings vOP2Buffer;
         float *zeroV;
         float *slope;
         float *coReading;
         float *vReading;
+        float *vOP1Reading;
+        float *vOP2Reading;
 };
 
 #define CO_BUFFER_SIZE 4

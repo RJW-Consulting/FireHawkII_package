@@ -283,7 +283,7 @@ static void task_driver_tick(void *pvParameters)
       now = rtc.now();
       co2.tick();
       co_1.tick();
-      co_2.tick();
+      //co_2.tick();
       ptrh.tick();
       caseTemp.tick();
       selectorValves.tick();
@@ -413,8 +413,8 @@ void initDrivers()
   amValve.init();
   now = rtc.now();
   co2.open(19200, &now, 1);
-  co_1.init(&now, &readings.coConc1, &readings.coV1, &settings.coSlope1, &settings.coIntercept1, &ads1115_a,  CO_1_ADC_CHANNEL);
-  co_2.init(&now, &readings.coConc2, &readings.coV2, &settings.coSlope2, &settings.coIntercept2, &ads1115_a,  CO_2_ADC_CHANNEL);
+  co_1.init(&now, &readings.coConc1, &readings.coV1, &readings.co1OP1V, &readings.co1OP2V, &settings.coSlope1, &settings.coIntercept1, &ads1115_a,  CO_1_ADC_CHANNEL);
+  //co_2.init(&now, &readings.coConc2, &readings.coV2, &settings.coSlope2, &settings.coIntercept2, &ads1115_a,  CO_2_ADC_CHANNEL);
   ptrh.init(&now, &gasPTRH);
   caseTemp.init(&now, &mcp9809, MCP9808_T_SENSOR_I2C_ADDR);
   led.init(STATUS_LED_PIN);  

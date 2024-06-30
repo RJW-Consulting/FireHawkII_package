@@ -36,6 +36,8 @@ struct Readings {
     double flowAm; 
     float pressure1;
     float pressure2;
+    float co1OP1V;
+    float co1OP2V;
 };
 
 struct Settings {
@@ -100,6 +102,8 @@ struct DataPacket{
     float batteryV;
     float pressure1;
     float pressure2;
+    float co1OP1V;
+    float co1OP2V;
 } __attribute__((__packed__));
 
 struct StringPacket{

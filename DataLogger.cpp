@@ -237,6 +237,8 @@ String DataLogger::getLogStringHeader()
     header += "sorbent_valve_pwr,";
     header += "quartz_valve_pwr,";
     header += "teflon_valve_pwr";
+    header += "co1_op1_v";
+    header += "co1_op2_v";
     header += "\n";
     return header;
 }
@@ -323,6 +325,10 @@ String DataLogger::buildLogString()
     line += String(oaValve.getValveSetting());
     line += ",";
     line += String(amValve.getValveSetting());
+    line += ",";
+    line += String(readings.co1OP1V);
+    line += ",";
+    line += String(readings.co1OP2V);
     line += "\n";
 
     return line;
@@ -360,6 +366,8 @@ void DataLogger::fillDataPacket(struct DataPacket *packet)
     packet->batteryV = readings.batteryV;
     packet->pressure1 = readings.pressure1;
     packet->pressure2 = readings.pressure2;
+    packet->co1OP1V = readings.co1OP1V;
+    packet->co1OP2V = readings.co1OP2V;
 }
 
 String DataLogger::getLogDataTypes()
@@ -375,7 +383,7 @@ String DataLogger::getLogDataTypes()
     f       float       4       4-byte floating point 
 
     */ 
-   String retString = "tuuuUUUcfffffffffffffff";
+   String retString = "tuuuUUUcfffffffffffffffff";
    return retString;
 }
 
