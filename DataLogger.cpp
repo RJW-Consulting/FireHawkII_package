@@ -63,6 +63,7 @@ void DataLogger::loadSettings()
     settings.oaFlowIntercept = ini.getf(section, "oaFlowIntercept", 0);
     settings.amFlowSlope = ini.getf(section, "amFlowSlope", 1.0);
     settings.amFlowIntercept = ini.getf(section, "amFlowIntercept", 0);
+    settings.battThreshold = ini.getf(section, "battThreshold", 10.0);
 
     gasValve.updateKs();
     oaValve.updateKs();
@@ -110,6 +111,7 @@ bool DataLogger::saveSettings()
     success &= ini.put(section, "oaFlowIntercept", (INI_REAL) settings.oaFlowIntercept);
     success &= ini.put(section, "amFlowSlope", (INI_REAL) settings.amFlowSlope);
     success &= ini.put(section, "amFlowIntercept", (INI_REAL) settings.amFlowIntercept);
+    success &= ini.put(section, "battThreshold", (INI_REAL) settings.battThreshold);
 
     if (wasLogging)
     {

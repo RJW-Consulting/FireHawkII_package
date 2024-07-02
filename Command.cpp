@@ -79,38 +79,46 @@ bool Command::setSampleSet(uint set)
     bool retval = false;
     if (readings.sampleSet != set)
         co2.resetAccumulators();
-    if (set > 4)
+    if ((readings.batteryV < settings.battThreshold) && (set != 0))
     {
-        strcpy(responseBuff.stringPacket.chars, "set must be 0-4");
+        String rstring = "Battery below "+String(settings.battThreshold)+"V threshold.  Cannnot open sample set.";
+        strcpy(responseBuff.stringPacket.chars, rstring.c_str());
     }
     else
     {
-        if (set == 0)
+        if (set > 4)
         {
-            settings.samplePumpOn = false;
-            selectorValves.closeGang(0);
-            selectorValves.closeGang(1);
-            selectorValves.closeGang(2);
-            strcpy(responseBuff.stringPacket.chars, "All selector valves closed");
-            retval = true;
-        }
-        else if (set == 4)
-        {
-            settings.samplePumpOn = true;
-            selectorValves.closeGang(0);
-            selectorValves.closeGang(1);
-            selectorValves.closeGang(2);
-            strcpy(responseBuff.stringPacket.chars, "All selector valves closed, pump on");
-            retval = true;
+            strcpy(responseBuff.stringPacket.chars, "set must be 0-4");
         }
         else
         {
-            selectorValves.openSet(set-1);
-            settings.samplePumpOn = true;
-            sprintf(responseBuff.stringPacket.chars,"Opened sample set %u", set);
-            retval = true;
+            if (set == 0)
+            {
+                settings.samplePumpOn = false;
+                selectorValves.closeGang(0);
+                selectorValves.closeGang(1);
+                selectorValves.closeGang(2);
+                strcpy(responseBuff.stringPacket.chars, "All selector valves closed");
+                retval = true;
+            }
+            else if (set == 4)
+            {
+                settings.samplePumpOn = true;
+                selectorValves.closeGang(0);
+                selectorValves.closeGang(1);
+                selectorValves.closeGang(2);
+                strcpy(responseBuff.stringPacket.chars, "All selector valves closed, pump on");
+                retval = true;
+            }
+            else
+            {
+                selectorValves.openSet(set-1);
+                settings.samplePumpOn = true;
+                sprintf(responseBuff.stringPacket.chars,"Opened sample set %u", set);
+                retval = true;
+            }
+            readings.sampleSet = set;
         }
-        readings.sampleSet = set;
     }
     return retval;   
 }
@@ -625,6 +633,15 @@ void Command::co2background(FH_CommandParser::Argument *args, char *response)
     strcpy(response, rstring.c_str());
 }
 
+void Command::setBattThreshold(FH_CommandParser::Argument *args, char *response)
+{
+    response[0] = 0;
+    float threshold = (float) args[0].asDouble;    
+    settings.battThreshold = threshold;
+    String rstring = "Battery threshold set to "+String(threshold)+"V";
+    strcpy(response, rstring.c_str());
+}
+
 
 void Command::init()
 {
@@ -648,6 +665,7 @@ void Command::init()
     parser.registerCommand("fz","s", &flowZero);
     parser.registerCommand("fs","su", &flowSpan);
     parser.registerCommand("co2b","d", &co2background);
+    parser.registerCommand("bt","d", &setBattThreshold);
 }
 
 

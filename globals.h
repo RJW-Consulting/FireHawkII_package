@@ -75,6 +75,7 @@ struct Settings {
     float oaFlowSlope;
     float amFlowIntercept;
     float amFlowSlope;
+    float battThreshold;
 };
 
 struct DataPacket{

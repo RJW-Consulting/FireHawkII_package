@@ -1,5 +1,4 @@
 
-
 #include <FreeRTOS.h>
 #include <croutine.h>
 #include <deprecated_definitions.h>
@@ -65,7 +64,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include "globals.h"
 #include "I2C_Addrs.h"
 
-String versionString = "Firehawk II FW Vers 1.2";
+String versionString = "Firehawk II FW Vers 1.3";
 
 //**************************************************************************
 // Type Defines and Constants
@@ -270,6 +269,10 @@ void batteryVoltage()
   int16_t battOneThirdV;
   battOneThirdV = ads1115_b.readADC_SingleEnded(3);
   readings.batteryV = ((float) battOneThirdV) * ADC_VOLT_CONVERSION * 3;
+  if ((readings.batteryV < settings.battThreshold) && (readings.sampleSet != 0))
+  {
+    command.setSampleSet(0);
+  }
 }
 
 static void task_driver_tick(void *pvParameters)
