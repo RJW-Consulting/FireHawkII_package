@@ -36,42 +36,50 @@ void Radio::initHardware()
 
 void Radio::tick()
 {
-    if (radio_manager.available())
+    // silence radio if flag in settings is set
+    if (settings.radioSilence)
+        radio_driver_rf95.setTxPower(0, false);
+    else
+        radio_driver_rf95.setTxPower(20, false);
+
+    if (!settings.radioSilence)
     {
-        uint8_t len = sizeof(packetBuffer);
-        uint8_t from;
-        if (radio_manager.recvfromAck((uint8_t *) &packetBuffer, &len, &from))
+        if (radio_manager.available())
         {
-            //packetBuffer.StringPacket[len-1] = 0;
-            xQueueSend(handle_command_queue, &packetBuffer.stringPacket.chars, portMAX_DELAY);
+            uint8_t len = sizeof(packetBuffer);
+            uint8_t from;
+            if (radio_manager.recvfromAck((uint8_t *) &packetBuffer, &len, &from))
+            {
+                //packetBuffer.StringPacket[len-1] = 0;
+                xQueueSend(handle_command_queue, &packetBuffer.stringPacket.chars, portMAX_DELAY);
+            }
+        }
+
+        if (xQueueReceive(handle_command_response_queue, (void *) &packetBuffer, 0))
+        {
+            Serial.println("sending command response");
+            if (radio_manager.sendtoWait((uint8_t*) &packetBuffer, (uint8_t) sizeof(packetBuffer), settings.stationRadioAddress))
+            {
+                Serial.println("Send Response Succeeded");        
+            }
+            else
+            {
+                Serial.println("Send Response Failed");
+            }
+        }
+
+        if (xQueueReceive(handle_data_queue, (void *) &packetBuffer, 0))
+        {
+            if (radio_manager.sendtoWait((uint8_t*) &packetBuffer, (uint8_t) sizeof(packetBuffer), settings.stationRadioAddress))
+            {
+                Serial.println("Send Succeeded"); 
+                settings.baseStationAnswering = true;      
+            }
+            else
+            {
+                Serial.println("Send Failed");
+                settings.baseStationAnswering = false;      
+            }
         }
     }
-
-    if (xQueueReceive(handle_command_response_queue, (void *) &packetBuffer, 0))
-    {
-        Serial.println("sending command response");
-        if (radio_manager.sendtoWait((uint8_t*) &packetBuffer, (uint8_t) sizeof(packetBuffer), settings.stationRadioAddress))
-        {
-            Serial.println("Send Response Succeeded");        
-        }
-        else
-        {
-            Serial.println("Send Response Failed");
-        }
-    }
-
-    if (xQueueReceive(handle_data_queue, (void *) &packetBuffer, 0))
-    {
-        if (radio_manager.sendtoWait((uint8_t*) &packetBuffer, (uint8_t) sizeof(packetBuffer), settings.stationRadioAddress))
-        {
-            Serial.println("Send Succeeded"); 
-            settings.baseStationAnswering = true;      
-        }
-        else
-        {
-            Serial.println("Send Failed");
-            settings.baseStationAnswering = false;      
-        }
-    }
-
 };

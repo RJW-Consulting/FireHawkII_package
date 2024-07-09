@@ -64,7 +64,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include "globals.h"
 #include "I2C_Addrs.h"
 
-String versionString = "Firehawk II FW Vers 1.3";
+String versionString = "Firehawk II FW Vers 1.4";
 
 //**************************************************************************
 // Type Defines and Constants
@@ -222,6 +222,61 @@ Radio radio;
 #define INTERVAL_DRIVER_TEST 1000
 #define INTERVAL_LED_TICK 100
 
+#define BUTTON_PIN 5
+#define BUTTON_INTERRUPT 0
+
+bool button_pushed = false;
+uint32_t button_pushed_time;
+bool button_down = false;
+
+bool button_is_down()
+{
+  if (digitalRead(BUTTON_PIN) == LOW)
+    button_down = true;
+  else
+    button_down = false;
+  return button_down;
+}
+
+void button_ISR()
+{
+  if (digitalRead(BUTTON_PIN) == LOW)
+  {
+    button_pushed = true;
+    button_pushed_time = now.unixtime();
+  }
+}
+
+void button_setup()
+{
+  button_pushed = false;
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  // This approach is not recommended, but is necessary since there's a bug in digitalPinToInterrupt():
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), button_ISR, CHANGE);
+}
+
+void button_check()
+{
+  if (button_pushed)
+  {
+    if ((now.unixtime() - button_pushed_time) >= 2)
+    {
+      if (button_is_down())
+      {
+        settings.radioSilence = !settings.radioSilence;
+      }
+      button_pushed = false;
+    }
+    else
+    {
+      if (!button_is_down())
+      {
+        button_pushed = false;
+      }
+    }
+  }
+}
+
 static void task_ms_clock(void *pvParameters)
 {
   Serial.println("Millisecond clock started");
@@ -284,6 +339,7 @@ static void task_driver_tick(void *pvParameters)
     if (initialized)
     {
       now = rtc.now();
+      button_check();
       co2.tick();
       co_1.tick();
       //co_2.tick();
@@ -423,6 +479,7 @@ void initDrivers()
   led.init(STATUS_LED_PIN);  
   //p1.init();
   //p2.init();
+  button_setup();
   initialized = true;
 }
 
@@ -430,6 +487,7 @@ void initGlobals()
 {
   settings.samplePumpOn = false;
   settings.baseStationAnswering = false;
+  settings.radioSilence = true;
 }
 
 Adafruit_I2CDevice i2c_dev = Adafruit_I2CDevice(0x10);

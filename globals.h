@@ -48,6 +48,7 @@ struct Settings {
     bool samplePumpOn;
     bool co2PumpOn;
     bool baseStationAnswering;
+    bool radioSilence;
     uint samplePumpSpeed;
     uint stationRadioAddress;
     uint droneRadioAddress;

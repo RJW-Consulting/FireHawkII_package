@@ -51,16 +51,23 @@ void Driver_StatusLED::tick()
 void Driver_StatusLED::setStatus()
 {
     flash = LED_FLASH_FAST;
+    if (settings.radioSilence)
+    {
+        // radio silence is purple 
+        color1 = pixel.Color(0, 0, 0);
 
-    if (!settings.baseStationAnswering)
-    {
-        // base station answering is green 
-        color1 = pixel.Color(0, 255, 0);
     }
-    else
-    {
-        // no radio contact is red 
-        color1 = pixel.Color(255, 0, 0);
+    else{
+        if (!settings.baseStationAnswering)
+        {
+            // base station answering is green 
+            color1 = pixel.Color(0, 255, 0);
+        }
+        else
+        {
+            // no radio contact is red 
+            color1 = pixel.Color(255, 0, 0);
+        }
     }
 
     if (settings.co2State == 'M')

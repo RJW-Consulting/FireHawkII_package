@@ -192,8 +192,14 @@ void DataLogger::tick()
             Serial.println(logLine);
 
         // Send data to radio data queue
+        if (uxQueueSpacesAvailable( handle_data_queue ) == 0)
+        {
+            // queue is full, dump a packet off the front of the queue to make room
+            xQueueReceive(handle_data_queue, (void *) &packet, 0);
+        }
         fillDataPacket(&packet);
         xQueueSend(handle_data_queue, &packet, portMAX_DELAY);
+
 
         if (logFileName != "")
         {
