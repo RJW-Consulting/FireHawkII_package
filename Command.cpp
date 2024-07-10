@@ -470,20 +470,19 @@ void Command::setTime(FH_CommandParser::Argument *args, char *response)
 void Command::zeroCO()
 {
     co_1.zero();
-    co_2.zero();
+    //co_2.zero();
 }
 
 void Command::zeroCO(FH_CommandParser::Argument *args, char *response)
 {
     command.zeroCO();
     sprintf(responseBuff.stringPacket.chars,"CO zero intercept set.");
-
 }
 
 void Command::spanCO(float spanPPM)
 {
     co_1.span(spanPPM);
-    co_2.span(spanPPM);
+    //co_2.span(spanPPM);
 }
 
 void Command::spanCO(FH_CommandParser::Argument *args, char *response)

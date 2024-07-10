@@ -64,7 +64,7 @@ LoadFile ../.build/FireHawk_II_devel.ino.elf
 #include "globals.h"
 #include "I2C_Addrs.h"
 
-String versionString = "Firehawk II FW Vers 1.4";
+String versionString = "Firehawk II FW Vers 1.5";
 
 //**************************************************************************
 // Type Defines and Constants
